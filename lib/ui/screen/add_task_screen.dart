@@ -44,7 +44,13 @@ class AddTask extends StatefulWidget {
 }
 
 class _AddTaskState extends State<AddTask> {
+  //
+  // PAGE UTIL
   bool _hideButton;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  //
+  // VARIABLE FOR SAVING TASKS
   DateTime _selectedDate;
   TimeOfDay _startTime, _endTime;
   int _tag = 0;
@@ -63,6 +69,8 @@ class _AddTaskState extends State<AddTask> {
   List<ItemData> _reoderableItems = List();
   List<TextEditingController> listController = [];
 
+  //
+  // FUNCTION
   @protected
   void initState() {
     super.initState();
@@ -204,6 +212,7 @@ class _AddTaskState extends State<AddTask> {
         return true;
       },
       child: Scaffold(
+          key: _scaffoldKey,
           resizeToAvoidBottomInset: true,
           appBar: AppBar(
             leading: IconButton(
@@ -224,53 +233,55 @@ class _AddTaskState extends State<AddTask> {
   }
 
   Widget body() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(60)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            title(),
-            SizedBox(height: ScreenUtil().setHeight(80)),
-            taskTitleTextfield(),
-            SizedBox(height: ScreenUtil().setHeight(60)),
-            datePicker(),
-            SizedBox(height: ScreenUtil().setHeight(30)),
-            timePicker(),
-            SizedBox(height: ScreenUtil().setHeight(30)),
-            locationTextfield(),
-            SizedBox(height: ScreenUtil().setHeight(60)),
-            Text(
-              'Description',
-              style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
-            ),
-            SizedBox(height: ScreenUtil().setHeight(30)),
-            _descriptionController.text == ""
-                ? addDescriptionButton()
-                : descriptionTextfield(),
-            SizedBox(height: ScreenUtil().setHeight(60)),
-            Text(
-              'Participants',
-              style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
-            ),
-            participantTextfield(),
-            SizedBox(height: ScreenUtil().setHeight(15)),
-            chipsTags(),
-            SizedBox(height: ScreenUtil().setHeight(60)),
-            Text(
-              'Category',
-              style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
-            ),
-            chipsCategory(),
-            SizedBox(height: ScreenUtil().setHeight(60)),
-            Text(
-              'SubTask',
-              style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
-            ),
-            subtaskTextfield(),
-            listSubtask(),
-            SizedBox(height: ScreenUtil().setHeight(300)),
-          ],
+    return GestureDetector(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(60)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              title(),
+              SizedBox(height: ScreenUtil().setHeight(80)),
+              taskTitleTextfield(),
+              SizedBox(height: ScreenUtil().setHeight(60)),
+              datePicker(),
+              SizedBox(height: ScreenUtil().setHeight(30)),
+              timePicker(),
+              SizedBox(height: ScreenUtil().setHeight(30)),
+              locationTextfield(),
+              SizedBox(height: ScreenUtil().setHeight(60)),
+              Text(
+                'Description',
+                style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
+              ),
+              SizedBox(height: ScreenUtil().setHeight(30)),
+              _descriptionController.text == ""
+                  ? addDescriptionButton()
+                  : descriptionTextfield(),
+              SizedBox(height: ScreenUtil().setHeight(60)),
+              Text(
+                'Participants',
+                style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
+              ),
+              participantTextfield(),
+              SizedBox(height: ScreenUtil().setHeight(15)),
+              chipsTags(),
+              SizedBox(height: ScreenUtil().setHeight(60)),
+              Text(
+                'Category',
+                style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
+              ),
+              chipsCategory(),
+              SizedBox(height: ScreenUtil().setHeight(60)),
+              Text(
+                'SubTask',
+                style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
+              ),
+              subtaskTextfield(),
+              listSubtask(),
+              SizedBox(height: ScreenUtil().setHeight(300)),
+            ],
+          ),
         ),
       ),
     );
@@ -367,7 +378,11 @@ class _AddTaskState extends State<AddTask> {
         FocusScope.of(context).unfocus();
         showDialog(
             context: context,
-            builder: (BuildContext context) => TimePicker(addTime));
+            builder: (BuildContext context) => TimePicker(
+                  function: addTime,
+                  startTime: null,
+                  endTime: null,
+                ));
       },
       child: Row(
         children: <Widget>[
@@ -394,7 +409,7 @@ class _AddTaskState extends State<AddTask> {
           ),
           Text(
             _startTime != null
-                ? '${_startTime.format(context)} - ${_endTime.format(context)}'
+                ? '${_startTime.format(context)} - ${_endTime != null ? _endTime.format(context) : ""}'
                 : 'Pick Time',
             style: TextStyle(
                 fontSize: 14.0,
@@ -610,29 +625,50 @@ class _AddTaskState extends State<AddTask> {
           alignment: Alignment.bottomCenter,
           child: FloatingBottomButton(
               buttonFunction: () {
-                var tasks = _saveTasks();
-
-                if (widget.isNew == true) {
-                  BlocProvider.of<DatabaseBloc>(context)
-                      .add(CreateTask(tasks: tasks));
-
-                  scheduleNotification(
-                      DateTime(
-                          _selectedDate.year,
-                          _selectedDate.month,
-                          _selectedDate.day,
-                          _startTime.hour,
-                          _startTime.minute),
-                      tasks);
+                if (_selectedDate == null ||
+                    _startTime == null ||
+                    _endTime == null ||
+                    _titleController.text == "") {
+                  _scaffoldKey.currentState.showSnackBar(validationSnackBar());
                 } else {
-                  BlocProvider.of<DatabaseBloc>(context)
-                      .add(UpdateTask(tasks: tasks));
-                }
+                  var tasks = _saveTasks();
 
-                widget.function.call();
-                Navigator.pop(context);
+                  if (widget.isNew == true) {
+                    print('added');
+                    BlocProvider.of<DatabaseBloc>(context)
+                        .add(CreateTask(tasks: tasks));
+
+                    scheduleNotification(
+                        DateTime(
+                            _selectedDate.year,
+                            _selectedDate.month,
+                            _selectedDate.day,
+                            _startTime.hour,
+                            _startTime.minute),
+                        tasks);
+                  } else {
+                    BlocProvider.of<DatabaseBloc>(context)
+                        .add(UpdateTask(tasks: tasks));
+                  }
+
+                  widget.function.call();
+                  Navigator.pop(context);
+                }
               },
               title: widget.isNew == true ? "CREATE TASKS" : "UPDATE TASKS")),
+    );
+  }
+
+  Widget validationSnackBar() {
+    return SnackBar(
+      content: Text(_titleController.text != ""
+          ? "Please select date & time"
+          : "Title can't be null"),
+      action: SnackBarAction(
+          label: 'OK',
+          onPressed: () {
+            _scaffoldKey.currentState.hideCurrentSnackBar();
+          }),
     );
   }
 }

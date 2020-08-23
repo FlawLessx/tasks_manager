@@ -54,8 +54,8 @@ class _PinnedTaskPageState extends State<PinnedTaskPage> {
                     child: Container(
                       child: Center(
                         child: Container(
-                            height: ScreenUtil().setWidth(300),
-                            width: ScreenUtil().setWidth(300),
+                            height: ScreenUtil().setWidth(600),
+                            width: ScreenUtil().setWidth(600),
                             child: SvgPicture.asset(
                                 'src/img/empty_task_person.svg')),
                       ),
@@ -70,8 +70,8 @@ class _PinnedTaskPageState extends State<PinnedTaskPage> {
                     child: Container(
                       child: Center(
                         child: Container(
-                            height: ScreenUtil().setWidth(300),
-                            width: ScreenUtil().setWidth(300),
+                            height: ScreenUtil().setWidth(600),
+                            width: ScreenUtil().setWidth(600),
                             child: SvgPicture.asset('src/img/error.svg')),
                       ),
                     ),

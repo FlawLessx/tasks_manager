@@ -7,7 +7,11 @@ import 'package:task_manager/core/model/task_model.dart';
 class PopupMenu extends StatelessWidget {
   final Tasks tasks;
   final Color color;
-  PopupMenu({@required this.tasks, @required this.color});
+  final Function returnFunction;
+  PopupMenu(
+      {@required this.tasks,
+      @required this.color,
+      @required this.returnFunction});
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +22,11 @@ class PopupMenu extends StatelessWidget {
         BlocProvider.of<DatabaseBloc>(context)
             .add(UpdateTask(tasks: tasks.saveTasks(tasks, true, null)));
         Navigator.pop(context);
+        returnFunction.call();
       } else {
         BlocProvider.of<DatabaseBloc>(context).add(DeleteTask(tasks: tasks));
         Navigator.pop(context);
+        returnFunction.call();
       }
     }
 

@@ -92,21 +92,17 @@ class _ReoderableItemState extends State<ReoderableItem> {
                         Flexible(
                             child: TextField(
                           controller: widget.controller,
-                          decoration: InputDecoration(),
+                          maxLines: null,
+                          textInputAction: TextInputAction.done,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                          ),
                         ))
-                        /*Flexible(
-                          child: Text(widget.data.subtask.subtaskName,
-                              style: TextStyle(
-                                  color: widget.data.subtask.isDone == true
-                                      ? Colors.grey
-                                      : Colors.black,
-                                  fontStyle: widget.data.subtask.isDone == true
-                                      ? FontStyle.italic
-                                      : FontStyle.normal,
-                                  decoration: widget.data.subtask.isDone == true
-                                      ? TextDecoration.lineThrough
-                                      : TextDecoration.none)),
-                        ),*/
                       ],
                     ),
                   ),

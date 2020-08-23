@@ -24,6 +24,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   int _currentIndex;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Tasks> recentlyList = List();
   List<Tasks> todayList = List();
   List<Tasks> upcomingList = List();
@@ -70,6 +71,19 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     BlocProvider.of<DatabaseBloc>(context).add(GetHomePageTask());
   }
 
+  //
+  // REPLAY BLOC CURRENTLY NOT IMPLEMENTED DUE TO PLUGIN RESTRICTIVE
+  /*
+  void returnFunction() {
+    final databaseBloc = BlocProvider.of<DatabaseBloc>(context);
+    refreshUI();
+
+    _scaffoldKey.currentState.showSnackBar(undoStateSnackBar("", () {
+      databaseBloc
+    }));
+  }
+  */
+
   @override
   Widget build(BuildContext context) {
     /*Timer.periodic(Duration(minutes: 1), (timer) {
@@ -77,6 +91,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     });*/
 
     return Scaffold(
+        key: _scaffoldKey,
         resizeToAvoidBottomInset: false,
         extendBodyBehindAppBar: true,
         floatingActionButton: FloatingActionButton(
@@ -443,7 +458,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
                   child: CustomCard(
                     tasks: listTasks[index],
-                    function: refreshUI,
+                    returnFunction: refreshUI,
                     colorIndex: colorIndex,
                   ),
                 ),

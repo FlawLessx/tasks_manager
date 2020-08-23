@@ -9,11 +9,11 @@ import 'package:task_manager/ui/widget/popup_menu.dart';
 
 class CustomCard extends StatelessWidget {
   final Tasks tasks;
-  final Function function;
+  final Function returnFunction;
   final int colorIndex;
   CustomCard(
       {@required this.tasks,
-      @required this.function,
+      @required this.returnFunction,
       @required this.colorIndex});
 
   int _getMaxvalue(Tasks tasks) {
@@ -51,6 +51,8 @@ class CustomCard extends StatelessWidget {
     double percentage = _getPercentage(maxValue, currentValue);
 
     return Container(
+      height: ScreenUtil().setHeight(500),
+      width: ScreenUtil().setWidth(400),
       decoration: BoxDecoration(
           color: cardColorData.listCardColorData[colorIndex].cardColor,
           borderRadius:
@@ -90,9 +92,10 @@ class CustomCard extends StatelessWidget {
                         ),
                       ),
                       Container(
-                          height: 30,
-                          width: 20,
+                          height: ScreenUtil().setHeight(90),
+                          width: ScreenUtil().setWidth(60),
                           child: PopupMenu(
+                              returnFunction: returnFunction,
                               tasks: tasks,
                               color: cardColorData
                                   .listCardColorData[colorIndex].fontColor))

@@ -105,7 +105,7 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
       yield DatabaseEmpty();
     else {
       for (int i = 0; i < data.length; i++) {
-        data[i].date.day == event.date.day ?? tempList.add(data[i]);
+        if (data[i].date.day == event.date.day) tempList.add(data[i]);
       }
 
       tempList.sort((a, b) {
@@ -158,10 +158,14 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
         }
       }
 
-      if (list == null || list.length == 0)
+      print('list length: ${list.length}');
+
+      if (list == null || list.length == 0) {
         yield DatabaseEmpty();
-      else
+      } else {
+        print('task by date loaded');
         yield TaskByDateLoaded(list: list);
+      }
     }
   }
 
@@ -188,28 +192,28 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
         } else {
           //
           // GET PINNED TASKS
-          data[i].pinned == true ?? pinnedList.add(data[i]);
+          if (data[i].pinned == true) pinnedList.add(data[i]);
 
           //
           // GET RECENTLY TASKS
           bool recentlyStatus = task.checkTaskIfNow(data[i]);
-          recentlyStatus == true ?? recentlyList.add(data[i]);
+          if (recentlyStatus == true) recentlyList.add(data[i]);
 
           //
           // GET TODAY TASKS
-          data[i].date.day == now.day ?? todayList.add(data[i]);
+          if (data[i].date.day == now.day) todayList.add(data[i]);
 
           //
           // GET UPCOMING TASKS
           bool upcomingStatus = task.checkTimeBasedTasks(
               upcomingStartDate, upcomingEndDate, data[i]);
-          upcomingStatus == true ?? upcomingList.add(data[i]);
+          if (upcomingStatus == true) upcomingList.add(data[i]);
 
           //
           // GET LATER TASKS
           bool laterStatus =
               task.checkTimeBasedTasks(laterStartDate, laterEndDate, data[i]);
-          laterStatus == true ?? laterList.add(data[i]);
+          if (laterStatus == true) laterList.add(data[i]);
         }
       }
     }

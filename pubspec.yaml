@@ -50,8 +50,8 @@ dependencies:
   flutter_local_notifications: ^1.4.4+3
   rxdart: ^0.24.1
   flutter_reorderable_list: ^0.1.4
-  flare_flutter: ^2.0.6
   flutter_svg: ^0.18.0
+  replay_bloc: ^0.0.1-dev.2
 
 dev_dependencies:
   flutter_test:

@@ -19,6 +19,7 @@ class HiveProvider {
   //
   // CREATE DATA
   Future createTask(Tasks tasks) async {
+    print("created");
     box = Hive.box('taskManager');
     box.add(tasks);
     return;

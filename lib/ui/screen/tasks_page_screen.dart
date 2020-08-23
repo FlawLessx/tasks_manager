@@ -298,10 +298,17 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
               Expanded(
                 child: Container(
                   child: Center(
-                    child: Container(
-                        height: ScreenUtil().setWidth(300),
-                        width: ScreenUtil().setWidth(300),
-                        child: SvgPicture.asset('src/img/empty_task.svg')),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                            height: ScreenUtil().setWidth(600),
+                            width: ScreenUtil().setWidth(600),
+                            child: SvgPicture.asset('src/img/empty_task.svg')),
+                        Text("Currently no tasks, add new one (+)",
+                            style: TextStyle(color: Colors.grey, fontSize: 15))
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -314,8 +321,8 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                 child: Container(
                   child: Center(
                     child: Container(
-                        height: ScreenUtil().setWidth(300),
-                        width: ScreenUtil().setWidth(300),
+                        height: ScreenUtil().setWidth(600),
+                        width: ScreenUtil().setWidth(600),
                         child: SvgPicture.asset('src/img/error.svg')),
                   ),
                 ),

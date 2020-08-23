@@ -3,21 +3,32 @@ import 'package:flutter_screenutil/screenutil.dart';
 import 'package:intl/intl.dart';
 
 class TimePicker extends StatefulWidget {
+  final TimeOfDay startTime;
+  final TimeOfDay endTime;
   final Function function;
-  TimePicker(this.function);
+  TimePicker(
+      {@required this.function,
+      @required this.startTime,
+      @required this.endTime});
 
   @override
   _TimePickerState createState() => _TimePickerState();
 }
 
 class _TimePickerState extends State<TimePicker> {
+  //
+  // VARIABLES
   TimeOfDay now = TimeOfDay.now();
   TimeOfDay startTime;
   TimeOfDay endTime;
   TextEditingController startTimeController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
   final formal = DateFormat.jm();
+  bool returnStartTimeNotNull = true;
+  bool returnEndTimeNotNull = true;
 
+  //
+  // FUNCTION
   Future<TimeOfDay> _selectTime(BuildContext context, bool isEndTime) async {
     if (startTime != null) {
       var hour = startTime.hour + 1;
@@ -45,8 +56,33 @@ class _TimePickerState extends State<TimePicker> {
     return picked;
   }
 
+  void checkInitialTime() {
+    if (widget.startTime != null || widget.endTime != null) {
+      setState(() {
+        startTime = widget.startTime;
+        endTime = widget.endTime;
+        startTimeController.text = widget.startTime.format(context);
+        endTimeController.text = widget.endTime.format(context);
+      });
+    }
+  }
+
+  void checkReturnTime() {
+    setState(() {
+      startTime == null
+          ? returnStartTimeNotNull = false
+          : returnStartTimeNotNull = true;
+
+      endTime == null
+          ? returnEndTimeNotNull = false
+          : returnEndTimeNotNull = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    checkInitialTime();
+
     return Dialog(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(ScreenUtil().setWidth(40))),
@@ -69,14 +105,28 @@ class _TimePickerState extends State<TimePicker> {
                   FocusScope.of(context).requestFocus(new FocusNode());
                   startTime = await _selectTime(context, false);
                   setState(() {
-                    if (startTime != null)
+                    if (startTime != null) {
+                      returnStartTimeNotNull = true;
                       startTimeController.text = startTime.format(context);
+                    }
                   });
                 },
                 decoration: InputDecoration(
-                    contentPadding: EdgeInsets.all(0.0),
-                    labelText: 'Start',
-                    labelStyle: TextStyle(color: Color(0xFFfabb18))),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: returnEndTimeNotNull == true
+                              ? Theme.of(context).primaryColor
+                              : Colors.red)),
+                  contentPadding: EdgeInsets.all(0.0),
+                  labelText: returnStartTimeNotNull == true
+                      ? 'Start'
+                      : "Please select start time",
+                  labelStyle: TextStyle(
+                      fontSize: 14,
+                      color: returnStartTimeNotNull == true
+                          ? Theme.of(context).primaryColor
+                          : Colors.red),
+                ),
               ),
               TextField(
                 enabled: startTime != null ? true : false,
@@ -86,14 +136,28 @@ class _TimePickerState extends State<TimePicker> {
                   endTime = await _selectTime(context, true);
                   setState(() {
                     if (endTime != null) {
-                      endTimeController.text = endTime.format(context);
+                      {
+                        endTimeController.text = endTime.format(context);
+                        returnEndTimeNotNull = true;
+                      }
                     }
                   });
                 },
                 decoration: InputDecoration(
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: returnEndTimeNotNull == true
+                                ? Theme.of(context).primaryColor
+                                : Colors.red)),
                     contentPadding: EdgeInsets.all(0.0),
-                    labelText: 'End',
-                    labelStyle: TextStyle(color: Color(0xFFfabb18))),
+                    labelText: returnEndTimeNotNull == true
+                        ? 'End'
+                        : "Please select end time",
+                    labelStyle: TextStyle(
+                        fontSize: 14,
+                        color: returnEndTimeNotNull == true
+                            ? Theme.of(context).primaryColor
+                            : Colors.red)),
               ),
               SizedBox(height: ScreenUtil().setHeight(10)),
               Row(
@@ -103,19 +167,24 @@ class _TimePickerState extends State<TimePicker> {
                       onTap: () => Navigator.pop(context),
                       child: Text('CANCEL',
                           style: TextStyle(
-                              color: Color(0xFFfabb18),
+                              color: Theme.of(context).primaryColor,
                               fontFamily: "Roboto-Medium"))),
                   SizedBox(
                     width: ScreenUtil().setWidth(40),
                   ),
                   GestureDetector(
                       onTap: () {
-                        widget.function(startTime, endTime);
-                        Navigator.pop(context);
+                        checkReturnTime();
+
+                        if (returnStartTimeNotNull == true &&
+                            returnEndTimeNotNull == true) {
+                          widget.function(startTime, endTime);
+                          Navigator.pop(context);
+                        }
                       },
                       child: Text('OK',
                           style: TextStyle(
-                              color: Color(0xFFfabb18),
+                              color: Theme.of(context).primaryColor,
                               fontFamily: "Roboto-Medium"))),
                 ],
               )

@@ -107,7 +107,7 @@ class _MenuDashboardState extends State<MenuDashboard>
     });
   }
 
-  Widget page(
+  StatefulWidget page(
     int index,
     Function function,
   ) {
@@ -135,37 +135,37 @@ class _MenuDashboardState extends State<MenuDashboard>
 
     return Material(
       child: FancyDrawerWrapper(
-          backgroundColor: Colors.black.withOpacity(0.9),
+          backgroundColor: Colors.black.withOpacity(0.85),
           drawerItems: [
             menuItems(() {
               setState(() {
                 currentIndexPage = 0;
               });
-            }, Icons.home, "Home"),
+            }, Icons.home, "Home", 0),
             menuItems(() {
               setState(() {
                 currentIndexPage = 1;
               });
-            }, Icons.home, "All Tasks"),
+            }, FontAwesomeIcons.tasks, "All Tasks", 1),
             menuItems(() {
               setState(() {
                 currentIndexPage = 2;
               });
-            }, FontAwesomeIcons.pinterest, "Pinned Tasks")
+            }, FontAwesomeIcons.thumbtack, "Pinned Tasks", 2)
           ],
           child: page(currentIndexPage, onMenuTap),
           controller: drawerController),
     );
   }
 
-  Widget menuItems(Function function, IconData icons, String title) {
+  Widget menuItems(Function function, IconData icons, String title, int index) {
     return GestureDetector(
       onTap: function,
       child: Row(children: [
         Container(
           height: ScreenUtil().setHeight(80),
-          width: ScreenUtil().setWidth(20),
-          color: currentIndexPage == 0 ? Colors.white : Colors.transparent,
+          width: ScreenUtil().setWidth(15),
+          color: currentIndexPage == index ? Colors.white : Colors.transparent,
         ),
         SizedBox(
           width: ScreenUtil().setWidth(40),
@@ -173,16 +173,14 @@ class _MenuDashboardState extends State<MenuDashboard>
         Icon(
           icons,
           color: Colors.white,
-          size: 22,
+          size: ScreenUtil().setWidth(70),
         ),
         SizedBox(
           width: ScreenUtil().setWidth(50),
         ),
-        Text(
-          title,
-          style: TextStyle(
-              color: Colors.white, fontFamily: 'Roboto-Medium', fontSize: 18),
-        )
+        Text(title,
+            style: TextStyle(
+                color: Colors.white, fontFamily: 'Roboto-Medium', fontSize: 16))
       ]),
     );
   }
