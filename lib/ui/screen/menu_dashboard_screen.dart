@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:task_manager/core/model/notification_model.dart';
 import 'package:task_manager/ui/screen/detail_screen.dart';
 import 'package:task_manager/ui/screen/pinned_task_screen.dart';
@@ -26,6 +27,7 @@ class _MenuDashboardState extends State<MenuDashboard>
 
   @override
   void initState() {
+    requestPermission();
     drawerController = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(() {
@@ -46,6 +48,8 @@ class _MenuDashboardState extends State<MenuDashboard>
     super.dispose();
   }
 
+  //
+  // NOTIFICATION
   void _requestIOSPermissions() {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -79,9 +83,11 @@ class _MenuDashboardState extends State<MenuDashboard>
                   context,
                   MaterialPageRoute(
                     builder: (context) => DetailTask(
+                      function: null,
                       taskId: receivedNotification.payload,
                       tasks: null,
                       fromNotification: true,
+                      fromEditor: false,
                     ),
                   ),
                 );
@@ -99,14 +105,27 @@ class _MenuDashboardState extends State<MenuDashboard>
         context,
         MaterialPageRoute(
             builder: (context) => DetailTask(
+                  function: null,
                   taskId: payload,
                   tasks: null,
                   fromNotification: true,
+                  fromEditor: false,
                 )),
       );
     });
   }
 
+  //
+  // PERMISSION HANDLER
+  void requestPermission() async {
+    await [
+      Permission.notification,
+      Permission.storage,
+    ].request();
+  }
+
+  //
+  // PAGE FUNCTION
   StatefulWidget page(
     int index,
     Function function,
@@ -137,17 +156,17 @@ class _MenuDashboardState extends State<MenuDashboard>
       child: FancyDrawerWrapper(
           backgroundColor: Colors.black.withOpacity(0.85),
           drawerItems: [
-            menuItems(() {
+            menuItems(70, () {
               setState(() {
                 currentIndexPage = 0;
               });
             }, Icons.home, "Home", 0),
-            menuItems(() {
+            menuItems(60, () {
               setState(() {
                 currentIndexPage = 1;
               });
             }, FontAwesomeIcons.tasks, "All Tasks", 1),
-            menuItems(() {
+            menuItems(60, () {
               setState(() {
                 currentIndexPage = 2;
               });
@@ -158,8 +177,9 @@ class _MenuDashboardState extends State<MenuDashboard>
     );
   }
 
-  Widget menuItems(Function function, IconData icons, String title, int index) {
-    return GestureDetector(
+  Widget menuItems(double iconSize, Function function, IconData icons,
+      String title, int index) {
+    return InkWell(
       onTap: function,
       child: Row(children: [
         Container(
@@ -173,7 +193,7 @@ class _MenuDashboardState extends State<MenuDashboard>
         Icon(
           icons,
           color: Colors.white,
-          size: ScreenUtil().setWidth(70),
+          size: ScreenUtil().setWidth(iconSize),
         ),
         SizedBox(
           width: ScreenUtil().setWidth(50),

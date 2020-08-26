@@ -1,3 +1,4 @@
+import 'package:dough/dough.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +7,6 @@ import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
 import 'package:task_manager/core/model/card_color_data_model.dart';
 import 'package:task_manager/core/model/task_model.dart';
 import 'package:task_manager/core/model/text_time_category_model.dart';
-import 'package:task_manager/core/resources/local_notification_helper.dart';
 import 'package:task_manager/ui/screen/menu_dashboard_screen.dart';
 import 'package:task_manager/ui/widget/custom_card.dart';
 import 'package:task_manager/ui/widget/search_bar.dart';
@@ -72,7 +72,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   //
-  // REPLAY BLOC CURRENTLY NOT IMPLEMENTED DUE TO PLUGIN RESTRICTIVE
+  // REPLAY BLOC CURRENTLY NOT IMPLEMENTED DUE TO PLUGIN LIMITATION
   /*
   void returnFunction() {
     final databaseBloc = BlocProvider.of<DatabaseBloc>(context);
@@ -106,7 +106,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       fromTaskPage: false,
                     )));
           },
-          child: Icon(Icons.create),
+          child: Icon(Icons.create, color: Colors.black),
         ),
         body: body());
   }
@@ -128,7 +128,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             children: <Widget>[
               profileImageMenu(),
               SizedBox(height: ScreenUtil().setHeight(50)),
-              profileName(),
+              //profileName(),
               SizedBox(height: ScreenUtil().setHeight(10)),
               sumTaskToday(),
               SizedBox(height: ScreenUtil().setHeight(70)),
@@ -157,7 +157,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        InkWell(onTap: () => widget.onMenuTap.call(), child: Icon(Icons.sort)),
+        InkWell(
+            onTap: () => widget.onMenuTap.call(),
+            child: Icon(
+              Icons.sort,
+              color: Colors.black,
+              size: ScreenUtil().setWidth(100),
+            )),
+        //
+        // Account not yet implemented
+        /*
         GestureDetector(
           onTap: () {
             testNotification();
@@ -171,7 +180,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 filterQuality: FilterQuality.high,
                 fit: BoxFit.fill,
               )),
-        ),
+        ),*/
       ],
     );
   }
@@ -281,73 +290,83 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           if (state.pinnedList == null || state.pinnedList.length == 0)
             return Container();
           else
-            return GestureDetector(
-              onTap: () => Navigator.of(context, rootNavigator: true)
-                  .push(CupertinoPageRoute(
-                      fullscreenDialog: true,
-                      builder: (context) => DetailTask(
-                            tasks: state.pinnedList[0],
-                            function: refreshUI,
-                            fromNotification: false,
-                          ))),
-              child: Container(
-                height: ScreenUtil().setHeight(200),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 7,
-                      blurRadius: 7,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: ScreenUtil().setHeight(40),
-                        horizontal: ScreenUtil().setWidth(60)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Flexible(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Flexible(
-                                child: Text(state.pinnedList[0].taskName,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    style: TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 18.0,
-                                        fontFamily: 'Roboto-Medium')),
-                              ),
-                              Text("You can start tracking",
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 15.0,
-                                  ))
-                            ],
-                          ),
+            return DoughRecipe(
+              data: DoughRecipeData(
+                viscosity: 3000,
+                expansion: 1.025,
+              ),
+              child: PressableDough(
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context, rootNavigator: true)
+                      .push(CupertinoPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => DetailTask(
+                                tasks: state.pinnedList[0],
+                                function: refreshUI,
+                                fromNotification: false,
+                                fromEditor: false,
+                              ))),
+                  child: Container(
+                    height: ScreenUtil().setHeight(200),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 7,
+                          blurRadius: 7,
+                          offset: Offset(0, 3),
                         ),
-                        Container(
-                            width: 40,
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8.0))),
-                            child: Center(
-                                child: Icon(
-                              Icons.play_arrow,
-                              color: Colors.black87,
-                            )))
                       ],
-                    )),
+                    ),
+                    child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: ScreenUtil().setHeight(40),
+                            horizontal: ScreenUtil().setWidth(60)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Flexible(
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Flexible(
+                                    child: Text(state.pinnedList[0].taskName,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 18.0,
+                                            fontFamily: 'Roboto-Medium')),
+                                  ),
+                                  Text("You can start tracking",
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 15.0,
+                                      ))
+                                ],
+                              ),
+                            ),
+                            Container(
+                                width: 40,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8.0))),
+                                child: Center(
+                                    child: Icon(
+                                  Icons.play_arrow,
+                                  color: Colors.black87,
+                                )))
+                          ],
+                        )),
+                  ),
+                ),
               ),
             );
         } else {
@@ -416,7 +435,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           laterList = state.laterList;
 
           return Container(
-              height: ScreenUtil().setHeight(550),
+              height: ScreenUtil().setHeight(530),
               child: IndexedStack(
                 index: _currentIndex,
                 children: <Widget>[
@@ -448,8 +467,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   .push(CupertinoPageRoute(
                       fullscreenDialog: true,
                       builder: (context) => DetailTask(
+                            function: refreshUI,
                             tasks: listTasks[index],
                             fromNotification: false,
+                            fromEditor: false,
                             taskId: null,
                           ))),
               child: Container(

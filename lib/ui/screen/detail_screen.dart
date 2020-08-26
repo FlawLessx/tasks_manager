@@ -1,19 +1,23 @@
+import 'package:dough/dough.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:intl/intl.dart';
 import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
 import 'package:task_manager/core/model/reorder_list_model.dart';
+import 'package:task_manager/core/util/tasks_util.dart';
 import 'package:task_manager/ui/screen/add_task_screen.dart';
 import 'package:task_manager/ui/widget/custom_button.dart';
-import 'package:route_transitions/route_transitions.dart';
 import 'package:task_manager/core/model/task_detail_model.dart';
 import 'package:task_manager/core/model/task_model.dart';
 import 'package:task_manager/ui/widget/detail_task.dart';
 import 'package:task_manager/ui/widget/reorderable_item.dart';
+import 'package:task_manager/ui/widget/toast.dart';
 
 import 'menu_dashboard_screen.dart';
 
@@ -22,60 +26,76 @@ class DetailTask extends StatefulWidget {
   final String taskId;
   final Function function;
   final bool fromNotification;
+  final bool fromEditor;
   DetailTask(
       {@required this.tasks,
-      this.function,
+      @required this.function,
       this.taskId,
-      @required this.fromNotification});
+      @required this.fromNotification,
+      @required this.fromEditor});
 
   @override
   _DetailTaskState createState() => _DetailTaskState();
 }
 
 class _DetailTaskState extends State<DetailTask> {
+  //
+  // VARIABLES
   ScrollController _scrollController;
   bool lastStatus = true;
   List<String> data = List();
-  Tasks _tasks = Tasks();
-  List<ItemData> reoderableItems = List();
-  List<TextEditingController> listController = [];
+  Tasks _tasks = Tasks(
+      taskId: "initial",
+      taskName: "initial",
+      date: DateTime.now(),
+      endTime: TimeOfDay.now(),
+      startTime: TimeOfDay.now());
+  TasksUtil _tasksUtil = TasksUtil();
+  List<ItemData> _reoderableItems = List();
+  List<TextEditingController> textControllerList = [];
+  List<FocusNode> focusNodeList = [];
+  bool _showButton;
 
-  _scrollListener() {
-    if (isShrink != lastStatus) {
-      setState(() {
-        lastStatus = isShrink;
-      });
-    }
-  }
-
+  //
+  // INIT STATE
   @override
   void initState() {
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
+
+    KeyboardVisibility.onChange.listen((bool visible) {
+      if (visible == true) {
+        if (mounted) {
+          setState(() {
+            _showButton = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _showButton = true;
+          });
+          FocusScope.of(context).unfocus();
+        }
+      }
+    });
     refreshUI();
     super.initState();
   }
 
-  void addData(Tasks tasks) {
-    data.add(tasks.date != null
-        ? DateFormat('EEEE dd, MMMM yyyy').format(tasks.date)
-        : '-');
-    data.add(
-        '''${tasks.startTime != null ? tasks.startTime.format(context) : "-"} - ${tasks.endTime != null ? tasks.endTime.format(context) : "-"}''');
-    data.add('${tasks.place != "" ? tasks.place : "-"}');
-  }
-
-  bool get isShrink {
-    return _scrollController.hasClients &&
-        _scrollController.offset > (200 - (kToolbarHeight + 20));
-  }
-
+  //
+  // DISPOSE
   @override
   void dispose() {
     _scrollController.removeListener(_scrollListener);
+    for (var item in textControllerList) {
+      item.dispose();
+    }
     super.dispose();
   }
 
+  //
+  // PAGE FUNCTION
   void refreshUI() {
     if (widget.fromNotification == true) {
       BlocProvider.of<DatabaseBloc>(context)
@@ -97,18 +117,12 @@ class _DetailTaskState extends State<DetailTask> {
         startTime: tasks.startTime,
         endTime: tasks.endTime,
         participants: tasks.participants,
-        subtask: getSubtask(),
-        isDone: isDone);
+        subtask: getSubtask(_reoderableItems),
+        isDone: isDone,
+        pinned: tasks.pinned);
   }
 
-  void deleteSubtask(Key key) {
-    int index = _indexOfKey(key);
-    setState(() {
-      reoderableItems.removeAt(index);
-    });
-  }
-
-  List<Subtask> getSubtask() {
+  List<Subtask> getSubtask(List<ItemData> reoderableItems) {
     List<Subtask> subtaskList = List();
     for (var item in reoderableItems) {
       subtaskList.add(item.subtask);
@@ -116,40 +130,112 @@ class _DetailTaskState extends State<DetailTask> {
     return subtaskList;
   }
 
+  void addData(Tasks tasks) {
+    data.add(tasks.date != null
+        ? DateFormat('EEEE dd, MMMM yyyy').format(tasks.date)
+        : '-');
+    data.add(
+        '''${tasks.startTime != null ? tasks.startTime.format(context) : "-"} - ${tasks.endTime != null ? tasks.endTime.format(context) : "-"}''');
+    data.add('${tasks.place != "" ? tasks.place : "-"}');
+  }
+
+  bool get isShrink {
+    return _scrollController.hasClients &&
+        _scrollController.offset > (200 - (kToolbarHeight + 20));
+  }
+
+  _scrollListener() {
+    if (isShrink != lastStatus) {
+      setState(() {
+        lastStatus = isShrink;
+      });
+    }
+  }
+
+  _navigator() {
+    if (widget.fromNotification == false) {
+      BlocProvider.of<DatabaseBloc>(context)
+          .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
+      Navigator.pop(context);
+      if (widget.function != null) widget.function.call();
+    }
+
+    if (widget.fromEditor == true) {
+      BlocProvider.of<DatabaseBloc>(context)
+          .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MenuDashboard(currentIndexPage: 0)));
+    }
+
+    if (widget.fromNotification == true) {
+      BlocProvider.of<DatabaseBloc>(context)
+          .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MenuDashboard(currentIndexPage: 0)));
+    }
+  }
+
+  _bottomButtonFunction() {
+    BlocProvider.of<DatabaseBloc>(context).add(UpdateTask(
+        tasks: _tasksUtil.saveTasks(
+            _tasks, _tasks.isDone == false ? true : false, _tasks.pinned)));
+    if (widget.fromNotification == false) {
+      if (widget.function != null) widget.function.call();
+      Navigator.pop(context);
+    } else {
+      BlocProvider.of<DatabaseBloc>(context).add(GetHomePageTask());
+      Navigator.of(context, rootNavigator: true).push(CupertinoPageRoute(
+          fullscreenDialog: true,
+          builder: (context) => MenuDashboard(currentIndexPage: 0)));
+    }
+  }
+
+  //
+  // CALLBACK FUNCTION
+  void deleteSubtask(Key key) {
+    int index = _indexOfKey(key);
+    setState(() {
+      _reoderableItems.removeAt(index);
+      textControllerList.removeAt(index);
+      focusNodeList.removeAt(index);
+    });
+  }
+
   int _indexOfKey(Key key) {
-    return reoderableItems.indexWhere((ItemData d) => d.key == key);
+    return _reoderableItems.indexWhere((ItemData d) => d.key == key);
   }
 
   bool _reorderCallback(Key item, Key newPosition) {
     int draggingIndex = _indexOfKey(item);
     int newPositionIndex = _indexOfKey(newPosition);
 
-    final draggedItem = reoderableItems[draggingIndex];
+    final draggedItem = _reoderableItems[draggingIndex];
+    final controller = textControllerList[draggingIndex];
+    final focusNode = focusNodeList[draggingIndex];
+
     setState(() {
-      reoderableItems.removeAt(draggingIndex);
-      reoderableItems.insert(newPositionIndex, draggedItem);
+      _reoderableItems.removeAt(draggingIndex);
+      _reoderableItems.insert(newPositionIndex, draggedItem);
+      textControllerList.removeAt(draggingIndex);
+      textControllerList.insert(newPositionIndex, controller);
+      focusNodeList.removeAt(draggingIndex);
+      focusNodeList.insert(newPositionIndex, focusNode);
     });
     return true;
   }
+
+  //
+  // PAGE BUILDER
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async {
-          if (widget.fromNotification == false) {
-            BlocProvider.of<DatabaseBloc>(context)
-                .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
-            Navigator.pop(context);
-            widget.function.call();
-          } else {
-            BlocProvider.of<DatabaseBloc>(context).add(GetHomePageTask());
-            Navigator.of(context).push(PageRouteTransition(
-                animationType: AnimationType.slide_left,
-                curves: Curves.easeInOut,
-                fullscreenDialog: true,
-                maintainState: true,
-                builder: (context) => MenuDashboard(currentIndexPage: 0)));
-          }
+          _navigator();
 
           return true;
         },
@@ -157,13 +243,22 @@ class _DetailTaskState extends State<DetailTask> {
             body: BlocListener<DatabaseBloc, DatabaseState>(
           listener: (context, state) {
             if (state is TaskLoaded) {
+              print(state.tasks.taskName);
+              setState(() {
+                _tasks = state.tasks;
+              });
               for (var i = 0; i < state.tasks.subtask.length; i++) {
                 setState(() {
-                  _tasks = state.tasks;
-                  reoderableItems
+                  _reoderableItems
                       .add(ItemData(state.tasks.subtask[i], ValueKey(i)));
                 });
               }
+            } else if (state is TaskNotFound) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          MenuDashboard(currentIndexPage: 0)));
             }
           },
           child: ReorderableList(
@@ -190,31 +285,35 @@ class _DetailTaskState extends State<DetailTask> {
                 topRight: Radius.circular(ScreenUtil().setWidth(80)))),
         child: Stack(
           children: [
-            ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.symmetric(
-                  horizontal: ScreenUtil().setWidth(60),
-                  vertical: ScreenUtil().setHeight(60)),
-              children: [
-                taskDetailText(),
-                SizedBox(height: ScreenUtil().setHeight(30)),
-                detailTask(),
-                SizedBox(height: ScreenUtil().setHeight(30)),
-                descriptionText(),
-                SizedBox(height: ScreenUtil().setHeight(30)),
-                description(),
-                SizedBox(height: ScreenUtil().setHeight(30)),
-                participantsText(),
-                SizedBox(
-                  height: ScreenUtil().setHeight(30),
+            SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: ScreenUtil().setWidth(60),
+                    vertical: ScreenUtil().setHeight(60)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    taskDetailText(),
+                    SizedBox(height: ScreenUtil().setHeight(30)),
+                    detailTask(),
+                    SizedBox(height: ScreenUtil().setHeight(30)),
+                    descriptionText(),
+                    SizedBox(height: ScreenUtil().setHeight(30)),
+                    description(),
+                    SizedBox(height: ScreenUtil().setHeight(30)),
+                    participantsText(),
+                    SizedBox(
+                      height: ScreenUtil().setHeight(30),
+                    ),
+                    participantsTags(),
+                    SizedBox(height: ScreenUtil().setHeight(30)),
+                    subtaskText(),
+                    SizedBox(height: ScreenUtil().setHeight(30)),
+                    listSubtask(),
+                    SizedBox(height: ScreenUtil().setHeight(250)),
+                  ],
                 ),
-                participantsTags(),
-                SizedBox(height: ScreenUtil().setHeight(30)),
-                subtaskText(),
-                SizedBox(height: ScreenUtil().setHeight(30)),
-                listSubtask(),
-                SizedBox(height: ScreenUtil().setHeight(250)),
-              ],
+              ),
             ),
             button()
           ],
@@ -237,22 +336,7 @@ class _DetailTaskState extends State<DetailTask> {
             )
           : null,
       leading: GestureDetector(
-        onTap: () {
-          if (widget.fromNotification == false) {
-            BlocProvider.of<DatabaseBloc>(context)
-                .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
-            Navigator.pop(context);
-            widget.function.call();
-          } else {
-            BlocProvider.of<DatabaseBloc>(context).add(GetHomePageTask());
-            Navigator.of(context).push(PageRouteTransition(
-                animationType: AnimationType.slide_left,
-                curves: Curves.easeInOut,
-                fullscreenDialog: true,
-                maintainState: true,
-                builder: (context) => MenuDashboard(currentIndexPage: 0)));
-          }
-        },
+        onTap: _navigator,
         child: Padding(
           padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
           child: Container(
@@ -273,28 +357,77 @@ class _DetailTaskState extends State<DetailTask> {
       floating: false,
       pinned: true,
       actions: <Widget>[
-        IconButton(icon: Icon(Icons.favorite_border), onPressed: () {}),
+        BlocBuilder<DatabaseBloc, DatabaseState>(
+          builder: (context, state) {
+            if (state is TaskLoaded) {
+              return IconButton(
+                icon: Icon(
+                    state.tasks.pinned == true ? Icons.star : Icons.star_border,
+                    size: ScreenUtil().setWidth(90),
+                    color: Colors.black),
+                onPressed: () {
+                  setState(() {
+                    if (state.tasks.pinned == true) {
+                      state.tasks.pinned = false;
+                      _tasks.pinned = false;
+                      toastWidget("Unpinned Tasks");
+                    } else {
+                      _tasks.pinned = true;
+                      state.tasks.pinned = true;
+                      toastWidget("Tasks Pinned");
+                    }
+                  });
+                },
+                tooltip: "Pin Tasks",
+              );
+            } else {
+              return Container();
+            }
+          },
+        ),
+        BlocBuilder<DatabaseBloc, DatabaseState>(
+          builder: (context, state) {
+            if (state is TaskLoaded) {
+              return IconButton(
+                  icon: Icon(Icons.mode_edit,
+                      color: Colors.black, size: ScreenUtil().setWidth(90)),
+                  tooltip: "Edit Tasks",
+                  onPressed: () {
+                    var savedTasks = _saveTasks(_tasks, _tasks.isDone);
+
+                    BlocProvider.of<DatabaseBloc>(context)
+                        .add(UpdateTask(tasks: savedTasks));
+                    _reoderableItems.clear();
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddTask(
+                                  isNew: false,
+                                  function: refreshUI,
+                                  task: savedTasks,
+                                  fromHome: false,
+                                  fromTaskPage: false,
+                                )));
+                  });
+            } else {
+              return Container();
+            }
+          },
+        ),
         IconButton(
-            icon: Icon(Icons.mode_edit),
+            icon: Icon(
+              Icons.delete_forever,
+              size: ScreenUtil().setWidth(90),
+              color: Colors.black,
+            ),
+            tooltip: 'Delete Tasks',
             onPressed: () {
-              reoderableItems.clear();
-              Navigator.of(context).push(PageRouteTransition(
-                  animationType: AnimationType.slide_right,
-                  curves: Curves.easeInOut,
-                  builder: (context) => AddTask(
-                        isNew: false,
-                        function: refreshUI,
-                        task: _tasks,
-                        fromHome: false,
-                        fromTaskPage: false,
-                      )));
-            }),
-        IconButton(
-            icon: Icon(Icons.delete_forever),
-            onPressed: () {
-              BlocProvider.of<DatabaseBloc>(context)
-                  .add(DeleteTask(tasks: widget.tasks));
-              widget.function.call();
+              BlocProvider.of<DatabaseBloc>(context).add(DeleteTask(
+                  tasksID: widget.fromNotification != true
+                      ? widget.tasks.taskId
+                      : widget.taskId));
+              if (widget.function != null) widget.function.call();
               Navigator.pop(context);
             }),
       ],
@@ -326,8 +459,8 @@ class _DetailTaskState extends State<DetailTask> {
               builder: (context, state) {
                 if (state is TaskLoaded)
                   return Positioned(
-                    left: 20,
-                    top: 90,
+                    left: ScreenUtil().setWidth(60),
+                    top: ScreenUtil().setWidth(280),
                     child: Container(
                       height: ScreenUtil().setHeight(600),
                       width: ScreenUtil().setWidth(1000),
@@ -416,9 +549,10 @@ class _DetailTaskState extends State<DetailTask> {
                       combine: ItemTagsCombine.withTextBefore,
                       color: Theme.of(context).primaryColor,
                       activeColor: Theme.of(context).primaryColor,
+                      textActiveColor: Colors.black,
                       removeButton: ItemTagsRemoveButton(
                         backgroundColor: Colors.white,
-                        color: Theme.of(context).primaryColor,
+                        color: Colors.black,
                         onRemoved: () {
                           setState(() {
                             _tasks.participants.removeAt(index);
@@ -432,10 +566,7 @@ class _DetailTaskState extends State<DetailTask> {
                 )
               : Padding(
                   padding: EdgeInsets.only(left: ScreenUtil().setWidth(60)),
-                  child: Text(
-                      state.tasks.description != ""
-                          ? state.tasks.description
-                          : "No Description",
+                  child: Text("No Participants",
                       style: TextStyle(
                         color: Colors.black,
                       )),
@@ -489,37 +620,76 @@ class _DetailTaskState extends State<DetailTask> {
   }
 
   Widget listSubtask() {
-    return ListView.builder(
-        padding: EdgeInsets.all(0.0),
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemCount: reoderableItems.length,
-        itemBuilder: (context, index) {
-          listController.add(TextEditingController());
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListView.builder(
+            padding: EdgeInsets.all(0.0),
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _reoderableItems.length,
+            itemBuilder: (context, index) {
+              textControllerList.add(TextEditingController());
+              focusNodeList.add(FocusNode());
 
-          return ReoderableItem(
-            data: reoderableItems[index],
-            isFirst: index == 0,
-            isLast: index == reoderableItems.length - 1,
-            draggingMode: DraggingMode.iOS,
-            deleteCallback: deleteSubtask,
-            controller: listController[index],
-          );
-        });
+              return ReoderableItem(
+                data: _reoderableItems[index],
+                controller: textControllerList[index],
+                focusNode: focusNodeList[index],
+                isFirst: index == 0,
+                isLast: index == _reoderableItems.length - 1,
+                draggingMode: DraggingMode.iOS,
+                deleteCallback: deleteSubtask,
+              );
+            }),
+        SizedBox(
+          height: ScreenUtil().setHeight(30),
+        ),
+        DoughRecipe(
+          data: DoughRecipeData(
+            viscosity: 3000,
+            expansion: 1.025,
+          ),
+          child: PressableDough(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _reoderableItems.add(ItemData(
+                      Subtask(subtaskName: "", isDone: false),
+                      ValueKey(_reoderableItems == null
+                          ? 1
+                          : _reoderableItems.length + 1)));
+                });
+              },
+              child: Container(
+                height: ScreenUtil().setWidth(100),
+                width: ScreenUtil().setWidth(100),
+                decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(ScreenUtil().setWidth(15)))),
+                child: Center(
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
+    );
   }
 
   Widget button() {
-    return Align(
-        alignment: Alignment.bottomCenter,
-        child: FloatingBottomButton(
-            buttonFunction: () {
-              getSubtask();
-              BlocProvider.of<DatabaseBloc>(context).add(UpdateTask(
-                  tasks: _tasks.saveTasks(
-                      _tasks, _tasks.isDone == false ? true : false, null)));
-              widget.function.call();
-              Navigator.pop(context);
-            },
-            title: _tasks.isDone == false ? "MARK AS DONE" : "UNDONE TASKS"));
+    return Visibility(
+      visible: _showButton != null ? _showButton : true,
+      child: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingBottomButton(
+              buttonFunction: _bottomButtonFunction,
+              title: _tasks.isDone == false ? "MARK AS DONE" : "UNDONE TASKS")),
+    );
   }
 }

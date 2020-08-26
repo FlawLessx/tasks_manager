@@ -4,13 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:task_manager/core/model/reorder_list_model.dart';
 
 class ReoderableItem extends StatefulWidget {
-  ReoderableItem(
-      {this.data,
-      this.isFirst,
-      this.isLast,
-      this.draggingMode,
-      this.deleteCallback,
-      @required this.controller});
+  ReoderableItem({
+    @required this.data,
+    this.isFirst,
+    this.isLast,
+    this.draggingMode,
+    this.deleteCallback,
+    @required this.controller,
+    @required this.focusNode,
+  });
 
   final ItemData data;
   final bool isFirst;
@@ -18,16 +20,35 @@ class ReoderableItem extends StatefulWidget {
   final DraggingMode draggingMode;
   final Function deleteCallback;
   final TextEditingController controller;
+  final FocusNode focusNode;
 
   @override
   _ReoderableItemState createState() => _ReoderableItemState();
 }
 
 class _ReoderableItemState extends State<ReoderableItem> {
+  bool isFocus = false;
+  bool firstBuild = true;
+
   @override
   void initState() {
-    widget.controller.text = widget.data.subtask.subtaskName;
+    if (widget.data.subtask.subtaskName != "")
+      widget.controller.text = widget.data.subtask.subtaskName;
+
+    widget.focusNode.addListener(_onFocusChange);
     super.initState();
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      widget.focusNode.hasFocus ? isFocus = true : isFocus = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    //widget.controller.dispose();
+    super.dispose();
   }
 
   Widget _buildChild(BuildContext context, ReorderableItemState state) {
@@ -92,8 +113,27 @@ class _ReoderableItemState extends State<ReoderableItem> {
                         Flexible(
                             child: TextField(
                           controller: widget.controller,
+                          focusNode: widget.focusNode,
+                          autofocus: widget.data.subtask.subtaskName == "" &&
+                                  widget.isLast == true
+                              ? true
+                              : false,
                           maxLines: null,
                           textInputAction: TextInputAction.done,
+                          textCapitalization: TextCapitalization.sentences,
+                          style: widget.data.subtask.isDone == true
+                              ? TextStyle(
+                                  color: Colors.grey,
+                                  fontStyle: FontStyle.italic,
+                                  decoration: TextDecoration.lineThrough,
+                                )
+                              : null,
+                          onChanged: (value) {
+                            setState(() {
+                              firstBuild = false;
+                              widget.data.subtask.subtaskName = value;
+                            });
+                          },
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             disabledBorder: InputBorder.none,
@@ -106,14 +146,17 @@ class _ReoderableItemState extends State<ReoderableItem> {
                       ],
                     ),
                   ),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        widget.deleteCallback.call(widget.data.key);
-                      });
-                    },
-                    child: Icon(Icons.close,
-                        color: Colors.grey, size: ScreenUtil().setWidth(60)),
+                  Visibility(
+                    visible: isFocus,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          widget.deleteCallback.call(widget.data.key);
+                        });
+                      },
+                      child: Icon(Icons.close,
+                          color: Colors.grey, size: ScreenUtil().setWidth(60)),
+                    ),
                   )
                 ],
               ),

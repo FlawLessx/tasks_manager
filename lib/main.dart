@@ -77,6 +77,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
                 primaryColor: Color(0xFFfabb18),
                 scaffoldBackgroundColor: Colors.white,
+                cursorColor: Color(0xFFfabb18),
                 fontFamily: 'Roboto'),
             home: MenuDashboard(currentIndexPage: 0)));
   }

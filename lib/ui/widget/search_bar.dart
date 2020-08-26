@@ -54,7 +54,9 @@ class SearchBar extends SearchDelegate<Tasks> {
                             fullscreenDialog: true,
                             builder: (context) => DetailTask(
                                 fromNotification: false,
+                                fromEditor: false,
                                 function: function,
+                                taskId: null,
                                 tasks: state.list[index]))),
                     leading: Icon(
                       Icons.description,

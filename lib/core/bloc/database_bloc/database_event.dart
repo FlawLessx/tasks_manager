@@ -43,11 +43,11 @@ class UpdateTask extends DatabaseEvent {
 }
 
 class DeleteTask extends DatabaseEvent {
-  final Tasks tasks;
-  DeleteTask({@required this.tasks});
+  final String tasksID;
+  DeleteTask({@required this.tasksID});
 
   @override
-  List<Object> get props => [tasks];
+  List<Object> get props => [tasksID];
 }
 
 class GetHomePageTask extends DatabaseEvent {

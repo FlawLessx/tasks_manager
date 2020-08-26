@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:task_manager/core/resources/hive_repository.dart';
 import 'package:task_manager/core/model/task_model.dart';
 import 'package:task_manager/core/model/timeline_object_model.dart';
+import 'package:task_manager/core/util/tasks_util.dart';
 import 'package:timeline_node/timeline_node.dart';
 
 part 'database_event.dart';
@@ -14,20 +15,12 @@ part 'database_state.dart';
 class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
   final HiveRepository hiveRepository;
   DatabaseBloc(this.hiveRepository) : super(null);
-  Tasks task = Tasks();
+  TasksUtil _tasksUtil = TasksUtil();
 
   DatabaseState get initialState => DatabaseInitial();
 
-  int getIndex(List<Tasks> list, String taskId) {
-    int index = 0;
-
-    for (int i = 0; i < list.length; i++) {
-      list[i].taskId == taskId ? index = i : index = 0;
-    }
-
-    return index;
-  }
-
+  //
+  // MAP STATE
   @override
   Stream<DatabaseState> mapEventToState(
     DatabaseEvent event,
@@ -70,19 +63,22 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
     int index;
 
     if (event.taskId != null) {
-      index = getIndex(data, event.taskId);
+      index = _tasksUtil.getIndex(data, event.taskId);
       result = await hiveRepository.getTaskByID(index);
     } else {
-      index = getIndex(data, event.tasks.taskId);
+      index = _tasksUtil.getIndex(data, event.tasks.taskId);
       result = await hiveRepository.getTaskByID(index);
     }
 
-    yield TaskLoaded(tasks: result);
+    if (result != null)
+      yield TaskLoaded(tasks: result);
+    else
+      yield TaskNotFound();
   }
 
   Stream<DatabaseState> _mapUpdateTaskToState(UpdateTask event) async* {
     var data = await hiveRepository.getAllTask();
-    int index = getIndex(data, event.tasks.taskId);
+    int index = _tasksUtil.getIndex(data, event.tasks.taskId);
 
     await hiveRepository.updateTasks(index, event.tasks);
     yield TaskUpdated();
@@ -90,7 +86,7 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
 
   Stream<DatabaseState> _mapDeleteTaskToState(DeleteTask event) async* {
     var data = await hiveRepository.getAllTask();
-    int index = getIndex(data, event.tasks.taskId);
+    int index = _tasksUtil.getIndex(data, event.tasksID);
 
     await hiveRepository.deleteTasks(index);
     yield TaskDeleted();
@@ -118,7 +114,7 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
       });
 
       for (int i = 0; i < tempList.length; i++) {
-        bool isNow = task.checkTaskIfNow(tempList[i]);
+        bool isNow = _tasksUtil.checkTaskIfNow(tempList[i]);
         int status;
 
         if (tempList[i].isDone == true)
@@ -158,12 +154,9 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
         }
       }
 
-      print('list length: ${list.length}');
-
       if (list == null || list.length == 0) {
         yield DatabaseEmpty();
       } else {
-        print('task by date loaded');
         yield TaskByDateLoaded(list: list);
       }
     }
@@ -196,7 +189,7 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
 
           //
           // GET RECENTLY TASKS
-          bool recentlyStatus = task.checkTaskIfNow(data[i]);
+          bool recentlyStatus = _tasksUtil.checkTaskIfNow(data[i]);
           if (recentlyStatus == true) recentlyList.add(data[i]);
 
           //
@@ -205,21 +198,21 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
 
           //
           // GET UPCOMING TASKS
-          bool upcomingStatus = task.checkTimeBasedTasks(
+          bool upcomingStatus = _tasksUtil.checkTimeBasedTasks(
               upcomingStartDate, upcomingEndDate, data[i]);
           if (upcomingStatus == true) upcomingList.add(data[i]);
 
           //
           // GET LATER TASKS
-          bool laterStatus =
-              task.checkTimeBasedTasks(laterStartDate, laterEndDate, data[i]);
+          bool laterStatus = _tasksUtil.checkTimeBasedTasks(
+              laterStartDate, laterEndDate, data[i]);
           if (laterStatus == true) laterList.add(data[i]);
         }
       }
     }
 
     yield HomePageTaskLoaded(
-        pinnedList: pinnedList.length != 0 ? pinnedList : todayList,
+        pinnedList: pinnedList.length != 0 ? pinnedList : data,
         recentlyList: recentlyList,
         todayList: todayList,
         upcomingList: upcomingList,
@@ -250,7 +243,7 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
     List<Tasks> pinnedList = List();
 
     for (var item in data) {
-      item.pinned == true ?? pinnedList.add(item);
+      if (item.pinned == true) pinnedList.add(item);
     }
 
     if (pinnedList.length != 0)

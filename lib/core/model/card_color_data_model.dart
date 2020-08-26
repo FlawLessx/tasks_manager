@@ -30,9 +30,12 @@ class CardColorList {
   ];
 
   int getIndex(int index) {
-    if (tempList.length == 2) tempList = [];
+    if (index != 0) {
+      if (tempList.length == 2) tempList = [];
 
-    tempList.add(index);
-    return tempList.length - 1;
+      tempList.add(index);
+      return tempList.length - 1;
+    } else
+      return 0;
   }
 }

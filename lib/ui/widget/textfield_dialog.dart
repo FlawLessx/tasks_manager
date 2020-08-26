@@ -18,7 +18,7 @@ class _TextfieldDialogState extends State<TextfieldDialog> {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ScreenUtil().setWidth(40))),
         child: Container(
-          height: ScreenUtil().setHeight(700),
+          height: ScreenUtil().setWidth(700),
           width: ScreenUtil().setWidth(700),
           child: Padding(
               padding: EdgeInsets.all(ScreenUtil().setWidth(60)),

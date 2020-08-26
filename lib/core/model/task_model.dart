@@ -14,18 +14,23 @@ part 'task_model.g.dart';
 class Tasks {
   Tasks(
       {this.id,
-      this.taskId,
-      this.taskName,
+      @required this.taskId,
+      @required this.taskName,
       this.description,
       this.place,
       this.category,
-      this.date,
-      this.startTime,
-      this.endTime,
+      @required this.date,
+      @required this.startTime,
+      @required this.endTime,
       this.participants,
       this.subtask,
       this.isDone,
-      this.pinned});
+      this.pinned})
+      : assert(taskId != null &&
+            taskName != null &&
+            date != null &&
+            startTime != null &&
+            endTime != null);
 
   @HiveField(0)
   int id;
@@ -53,49 +58,6 @@ class Tasks {
   bool isDone;
   @HiveField(12)
   bool pinned;
-
-  bool checkTaskIfNow(Tasks tasks) {
-    bool status;
-    final now = DateTime.now();
-    final taskStartTime = DateTime(tasks.date.year, tasks.date.month,
-        tasks.date.day, tasks.startTime.hour, tasks.startTime.minute);
-    final tasksEndTime = DateTime(tasks.date.year, tasks.date.month,
-        tasks.date.day, tasks.endTime.hour, tasks.endTime.minute);
-
-    if (now.isAfter(taskStartTime) && now.isBefore(tasksEndTime))
-      status = true;
-    else
-      status = false;
-
-    return status;
-  }
-
-  bool checkTimeBasedTasks(DateTime startDate, DateTime endDate, Tasks tasks) {
-    bool status;
-
-    if (tasks.date.isAfter(startDate) && tasks.date.isBefore(endDate))
-      status = true;
-    else
-      status = false;
-
-    return status;
-  }
-
-  Tasks saveTasks(Tasks tasks, bool isDone, bool pinned) {
-    return Tasks(
-        taskId: tasks.taskId,
-        taskName: tasks.taskName,
-        description: tasks.description,
-        place: tasks.place,
-        category: tasks.category,
-        date: tasks.date,
-        startTime: tasks.startTime,
-        endTime: tasks.endTime,
-        participants: tasks.participants,
-        subtask: tasks.subtask,
-        isDone: isDone,
-        pinned: pinned != null ?? tasks.pinned);
-  }
 }
 
 @HiveType(typeId: 2)

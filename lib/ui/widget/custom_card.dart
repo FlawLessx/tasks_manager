@@ -1,3 +1,4 @@
+import 'package:dough/dough.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
@@ -50,113 +51,128 @@ class CustomCard extends StatelessWidget {
     int currentValue = _getCurrentValue(tasks);
     double percentage = _getPercentage(maxValue, currentValue);
 
-    return Container(
-      height: ScreenUtil().setHeight(500),
-      width: ScreenUtil().setWidth(400),
-      decoration: BoxDecoration(
-          color: cardColorData.listCardColorData[colorIndex].cardColor,
-          borderRadius:
-              BorderRadius.all(Radius.circular(ScreenUtil().setHeight(30))),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: Offset(0, 4), // changes position of shadow
-            ),
-          ]),
-      child: Padding(
-        padding: EdgeInsets.all(ScreenUtil().setHeight(30)),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return DoughRecipe(
+      data: DoughRecipeData(
+        viscosity: 3000,
+        expansion: 1.025,
+      ),
+      child: PressableDough(
+        child: Container(
+          height: ScreenUtil().setHeight(450),
+          width: ScreenUtil().setWidth(450),
+          decoration: BoxDecoration(
+              color: cardColorData.listCardColorData[colorIndex].cardColor,
+              borderRadius:
+                  BorderRadius.all(Radius.circular(ScreenUtil().setHeight(30))),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                  offset: Offset(0, 4), // changes position of shadow
+                ),
+              ]),
+          child: Padding(
+            padding: EdgeInsets.all(ScreenUtil().setHeight(30)),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              tasks.taskName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: cardColorData
+                                      .listCardColorData[colorIndex].fontColor,
+                                  fontFamily: 'Roboto-Medium',
+                                  fontSize: 15.0),
+                            ),
+                          ),
+                          Container(
+                              height: ScreenUtil().setHeight(90),
+                              width: ScreenUtil().setWidth(60),
+                              child: PopupMenu(
+                                  returnFunction: returnFunction,
+                                  tasks: tasks,
+                                  color: cardColorData
+                                      .listCardColorData[colorIndex].fontColor))
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: Column(
+                    children: [
                       Flexible(
                         child: Text(
-                          tasks.taskName,
-                          maxLines: 2,
+                          tasks.description,
                           overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                          style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 13.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(
+                      category.icon[tasks.category],
+                      color:
+                          cardColorData.listCardColorData[colorIndex].fontColor,
+                      size: ScreenUtil().setWidth(60),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Progress',
                           style: TextStyle(
                               color: cardColorData
                                   .listCardColorData[colorIndex].fontColor,
                               fontFamily: 'Roboto-Medium',
-                              fontSize: 14.0),
+                              fontSize: 13.0),
                         ),
-                      ),
-                      Container(
-                          height: ScreenUtil().setHeight(90),
-                          width: ScreenUtil().setWidth(60),
-                          child: PopupMenu(
-                              returnFunction: returnFunction,
-                              tasks: tasks,
+                        Text(
+                          '${percentage.toStringAsFixed(0)}%',
+                          style: TextStyle(
                               color: cardColorData
-                                  .listCardColorData[colorIndex].fontColor))
-                    ],
-                  ),
-                  SizedBox(height: ScreenUtil().setHeight(20)),
-                  Flexible(
-                    child: Text(
-                      tasks.description,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w400,
-                          fontSize: 13.0),
+                                  .listCardColorData[colorIndex].progressColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13.0),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Icon(
-                  category.icon[tasks.category],
-                  color: cardColorData.listCardColorData[colorIndex].fontColor,
-                  size: ScreenUtil().setWidth(60),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      'Progress',
-                      style: TextStyle(
-                          color: cardColorData
-                              .listCardColorData[colorIndex].fontColor,
-                          fontFamily: 'Roboto-Medium',
-                          fontSize: 13.0),
-                    ),
-                    Text(
-                      '$percentage',
-                      style: TextStyle(
-                          color: cardColorData
-                              .listCardColorData[colorIndex].progressColor,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13.0),
-                    ),
+                    SizedBox(height: ScreenUtil().setHeight(15)),
+                    FAProgressBar(
+                        size: ScreenUtil().setHeight(30),
+                        maxValue: maxValue,
+                        currentValue: currentValue,
+                        progressColor: cardColorData
+                            .listCardColorData[colorIndex].progressColor,
+                        backgroundColor: cardColorData
+                            .listCardColorData[colorIndex]
+                            .backgroundProgressColor)
                   ],
-                ),
-                SizedBox(height: ScreenUtil().setHeight(15)),
-                FAProgressBar(
-                    size: ScreenUtil().setHeight(30),
-                    maxValue: maxValue,
-                    currentValue: currentValue,
-                    progressColor: cardColorData
-                        .listCardColorData[colorIndex].progressColor,
-                    backgroundColor: cardColorData
-                        .listCardColorData[colorIndex].backgroundProgressColor)
+                )
               ],
-            )
-          ],
+            ),
+          ),
         ),
       ),
     );

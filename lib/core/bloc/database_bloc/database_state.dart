@@ -92,3 +92,8 @@ class PinnedTaskLoaded extends DatabaseState {
   @override
   List<Object> get props => [listTasks];
 }
+
+class TaskNotFound extends DatabaseState {
+  @override
+  List<Object> get props => [];
+}

@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
-import 'package:task_manager/core/model/task_model.dart';
+import 'package:task_manager/core/util/tasks_util.dart';
 import 'package:task_manager/ui/screen/add_task_screen.dart';
 import 'package:task_manager/ui/screen/menu_dashboard_screen.dart';
 import 'package:task_manager/ui/widget/date_picker.dart';
@@ -23,23 +23,19 @@ class TasksPage extends StatefulWidget {
   _TasksPageState createState() => _TasksPageState();
 }
 
-class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
+class _TasksPageState extends State<TasksPage> {
   var _date = DateTime.now();
-  AnimationController animationController;
-  Tasks tasks = Tasks();
+  TasksUtil _tasksUtil = TasksUtil();
 
   @override
   void initState() {
     refreshUI();
 
-    animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     super.initState();
   }
 
   @override
   void dispose() {
-    animationController.dispose();
     super.dispose();
   }
 
@@ -87,9 +83,10 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                 onPressed: () {
                   widget.onMenuTap.call();
                 },
-                icon: AnimatedIcon(
-                    icon: AnimatedIcons.menu_close,
-                    progress: animationController),
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.black,
+                ),
               )
             ],
           ),
@@ -152,10 +149,7 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
         Text(DateFormat('dd MMMM yyyy').format(DateTime.now()),
             style:
                 TextStyle(color: Colors.grey.withOpacity(0.6), fontSize: 15.0)),
-        Text(
-            _date == DateTime.now()
-                ? "Today"
-                : DateFormat('EEEE').format(_date),
+        Text("Today",
             style: TextStyle(
                 color: Colors.black, fontSize: 22.0, fontFamily: 'Roboto-Bold'))
       ],
@@ -277,6 +271,7 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                                     tasks: state.list[index].tasks,
                                     function: refreshUI,
                                     fromNotification: false,
+                                    fromEditor: false,
                                   )));
                         },
                         child: cardLayout(taskName, description, participants,
@@ -284,7 +279,7 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                           setState(() {
                             BlocProvider.of<DatabaseBloc>(context).add(
                                 UpdateTask(
-                                    tasks: tasks.saveTasks(
+                                    tasks: _tasksUtil.saveTasks(
                                         state.list[index].tasks, true, null)));
                             refreshUI();
                           });
@@ -315,20 +310,7 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
             ],
           );
         } else {
-          return Column(
-            children: [
-              Expanded(
-                child: Container(
-                  child: Center(
-                    child: Container(
-                        height: ScreenUtil().setWidth(600),
-                        width: ScreenUtil().setWidth(600),
-                        child: SvgPicture.asset('src/img/error.svg')),
-                  ),
-                ),
-              ),
-            ],
-          );
+          return Container();
         }
       },
     );

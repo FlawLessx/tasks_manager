@@ -54,7 +54,7 @@ class _CustomTextfieldState extends State<CustomTextfield> {
               child: Center(
                 child: Icon(
                   widget.icon,
-                  color: Colors.white,
+                  color: Colors.black,
                   size: ScreenUtil().setWidth(60),
                 ),
               ),
