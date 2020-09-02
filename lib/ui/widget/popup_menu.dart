@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
-import 'package:task_manager/core/model/popup_items_model.dart';
-import 'package:task_manager/core/model/task_model.dart';
-import 'package:task_manager/core/util/tasks_util.dart';
+
+import '../../core/bloc/database_bloc/database_bloc.dart';
+import '../../core/model/popup_items_model.dart';
+import '../../core/model/task_model.dart';
+import '../../core/util/tasks_util.dart';
 
 class PopupMenu extends StatelessWidget {
   final Tasks tasks;
@@ -31,14 +32,12 @@ class PopupMenu extends StatelessWidget {
       if (value == 0) {
         BlocProvider.of<DatabaseBloc>(context)
             .add(UpdateTask(tasks: _tasksUtil.saveTasks(tasks, true, null)));
-        Navigator.pop(context);
-        returnFunction.call();
       } else {
         BlocProvider.of<DatabaseBloc>(context)
             .add(DeleteTask(tasksID: tasks.taskId));
-        Navigator.pop(context);
-        returnFunction.call();
       }
+      //Navigator.pop(context);
+      returnFunction.call();
     }
 
     return PopupMenuButton<int>(

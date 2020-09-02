@@ -11,19 +11,20 @@ import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:intl/intl.dart';
-import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
-import 'package:task_manager/core/model/category_model.dart';
-import 'package:task_manager/core/model/reorder_list_model.dart';
-import 'package:task_manager/core/model/task_model.dart';
-import 'package:task_manager/core/resources/local_notification_helper.dart';
-import 'package:task_manager/ui/screen/detail_screen.dart';
-import 'package:task_manager/ui/screen/menu_dashboard_screen.dart';
-import 'package:task_manager/ui/widget/custom_textfield.dart';
-import 'package:task_manager/ui/widget/date_picker.dart';
-import 'package:task_manager/ui/widget/custom_button.dart';
-import 'package:task_manager/ui/widget/reorderable_item.dart';
-import 'package:task_manager/ui/widget/textfield_dialog.dart';
-import 'package:task_manager/ui/widget/time_picker.dart';
+
+import '../../core/bloc/database_bloc/database_bloc.dart';
+import '../../core/model/category_model.dart';
+import '../../core/model/reorder_list_model.dart';
+import '../../core/model/task_model.dart';
+import '../../core/util/local_notification_helper.dart';
+import '../widget/custom_button.dart';
+import '../widget/custom_textfield.dart';
+import '../widget/date_picker.dart';
+import '../widget/reorderable_item.dart';
+import '../widget/textfield_dialog.dart';
+import '../widget/time_picker.dart';
+import 'detail_screen.dart';
+import 'menu_dashboard_screen.dart';
 
 class AddTask extends StatefulWidget {
   final bool isNew;
@@ -47,11 +48,13 @@ class AddTask extends StatefulWidget {
 class _AddTaskState extends State<AddTask> {
   //
   // PAGE UTIL
+  //
   bool _showButton;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   //
   // VARIABLE FOR SAVING TASKS
+  //
   DateTime _selectedDate;
   TimeOfDay _startTime, _endTime;
   int _tag = 0;
@@ -183,7 +186,7 @@ class _AddTaskState extends State<AddTask> {
         BlocProvider.of<DatabaseBloc>(context)
             .add(CreateTask(tasks: _saveTasks()));
 
-        scheduleNotification(
+        notificationPlugin.scheduleNotification(
             DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day,
                 _startTime.hour, _startTime.minute),
             _saveTasks());

@@ -1,14 +1,30 @@
-import 'package:task_manager/core/model/task_model.dart';
+import '../model/task_model.dart';
 
 class TasksUtil {
   int getIndex(List<Tasks> list, String taskId) {
     int index = 0;
 
     for (int i = 0; i < list.length; i++) {
-      list[i].taskId == taskId ? index = i : index = 0;
+      if (list[i].taskId == taskId) {
+        index = i;
+        break;
+      }
     }
 
     return index;
+  }
+
+  Tasks getSingleTasks(List<Tasks> list, String taskId) {
+    var tempData;
+
+    for (var item in list) {
+      if (item.taskId == taskId) {
+        tempData = item;
+        break;
+      }
+    }
+
+    return tempData;
   }
 
   bool checkTaskIfNow(Tasks tasks) {

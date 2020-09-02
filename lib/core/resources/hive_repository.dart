@@ -1,5 +1,4 @@
-import 'package:task_manager/core/model/task_model.dart';
-
+import '../model/task_model.dart';
 import 'hive_provider.dart';
 
 class HiveRepository {

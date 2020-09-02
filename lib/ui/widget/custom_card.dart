@@ -3,10 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:task_manager/core/model/card_color_data_model.dart';
-import 'package:task_manager/core/model/category_model.dart';
-import 'package:task_manager/core/model/task_model.dart';
-import 'package:task_manager/ui/widget/popup_menu.dart';
+
+import '../../core/model/card_color_data_model.dart';
+import '../../core/model/category_model.dart';
+import '../../core/model/task_model.dart';
+import 'popup_menu.dart';
 
 class CustomCard extends StatelessWidget {
   final Tasks tasks;
@@ -58,8 +59,8 @@ class CustomCard extends StatelessWidget {
       ),
       child: PressableDough(
         child: Container(
-          height: ScreenUtil().setHeight(450),
-          width: ScreenUtil().setWidth(450),
+          height: ScreenUtil().setHeight(530),
+          width: ScreenUtil().setWidth(500),
           decoration: BoxDecoration(
               color: cardColorData.listCardColorData[colorIndex].cardColor,
               borderRadius:
@@ -95,7 +96,7 @@ class CustomCard extends StatelessWidget {
                                   color: cardColorData
                                       .listCardColorData[colorIndex].fontColor,
                                   fontFamily: 'Roboto-Medium',
-                                  fontSize: 15.0),
+                                  fontSize: 16.0),
                             ),
                           ),
                           Container(
@@ -146,7 +147,7 @@ class CustomCard extends StatelessWidget {
                               color: cardColorData
                                   .listCardColorData[colorIndex].fontColor,
                               fontFamily: 'Roboto-Medium',
-                              fontSize: 13.0),
+                              fontSize: 14.0),
                         ),
                         Text(
                           '${percentage.toStringAsFixed(0)}%',
@@ -154,7 +155,7 @@ class CustomCard extends StatelessWidget {
                               color: cardColorData
                                   .listCardColorData[colorIndex].progressColor,
                               fontWeight: FontWeight.w500,
-                              fontSize: 13.0),
+                              fontSize: 14.0),
                         ),
                       ],
                     ),

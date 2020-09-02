@@ -6,11 +6,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:task_manager/core/model/notification_model.dart';
-import 'package:task_manager/ui/screen/detail_screen.dart';
-import 'package:task_manager/ui/screen/pinned_task_screen.dart';
-import 'package:task_manager/ui/screen/tasks_page_screen.dart';
+
+import '../../main.dart';
+import 'detail_screen.dart';
 import 'homepage_screen.dart';
-import 'package:task_manager/main.dart';
+import 'pinned_task_screen.dart';
+import 'tasks_page_screen.dart';
 
 class MenuDashboard extends StatefulWidget {
   final int currentIndexPage;
@@ -22,12 +23,23 @@ class MenuDashboard extends StatefulWidget {
 
 class _MenuDashboardState extends State<MenuDashboard>
     with TickerProviderStateMixin {
+  //
+  //  VARIABLE
+  //
   FancyDrawerController drawerController;
   int currentIndexPage;
 
+  //
+  // INITSTATE & DISPOSE
+  //
   @override
   void initState() {
     requestPermission();
+    _requestIOSPermissions();
+    if (didReceiveLocalNotificationSubject.isClosed == false)
+      configureDidReceiveLocalNotificationSubject();
+    if (selectNotification.isClosed == false)
+      configureSelectNotificationSubject();
     drawerController = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(() {
@@ -35,21 +47,20 @@ class _MenuDashboardState extends State<MenuDashboard>
       });
     currentIndexPage = widget.currentIndexPage;
 
-    _requestIOSPermissions();
-    _configureDidReceiveLocalNotificationSubject();
-    _configureSelectNotificationSubject();
     super.initState();
   }
 
   @override
   void dispose() {
-    didReceiveLocalNotificationSubject.close();
     drawerController.dispose();
+    didReceiveLocalNotificationSubject.close();
+    selectNotification.close();
     super.dispose();
   }
 
   //
-  // NOTIFICATION
+  // NOTIFICATION FUNCTION
+  //
   void _requestIOSPermissions() {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -61,7 +72,26 @@ class _MenuDashboardState extends State<MenuDashboard>
         );
   }
 
-  void _configureDidReceiveLocalNotificationSubject() {
+  //
+  // SELECTED NOTIFICATION
+  //
+  void configureSelectNotificationSubject() {
+    selectNotification.stream.listen((String payload) async {
+      print(payload);
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => DetailTask(
+                taskId: payload,
+                tasks: null,
+                function: null,
+                fromNotification: true,
+                fromEditor: false)),
+      );
+    });
+  }
+
+  void configureDidReceiveLocalNotificationSubject() {
     didReceiveLocalNotificationSubject.stream
         .listen((ReceivedNotification receivedNotification) async {
       await showDialog(
@@ -99,24 +129,9 @@ class _MenuDashboardState extends State<MenuDashboard>
     });
   }
 
-  void _configureSelectNotificationSubject() {
-    selectNotificationSubject.stream.listen((String payload) async {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => DetailTask(
-                  function: null,
-                  taskId: payload,
-                  tasks: null,
-                  fromNotification: true,
-                  fromEditor: false,
-                )),
-      );
-    });
-  }
-
   //
   // PERMISSION HANDLER
+  //
   void requestPermission() async {
     await [
       Permission.notification,
@@ -126,6 +141,7 @@ class _MenuDashboardState extends State<MenuDashboard>
 
   //
   // PAGE FUNCTION
+  //
   StatefulWidget page(
     int index,
     Function function,
@@ -148,6 +164,9 @@ class _MenuDashboardState extends State<MenuDashboard>
     drawerController.toggle();
   }
 
+  //
+  // PAGE BUILDER
+  //
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, allowFontScaling: true);

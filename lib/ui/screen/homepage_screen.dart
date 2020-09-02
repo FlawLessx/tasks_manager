@@ -3,16 +3,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
-import 'package:task_manager/core/model/card_color_data_model.dart';
-import 'package:task_manager/core/model/task_model.dart';
-import 'package:task_manager/core/model/text_time_category_model.dart';
-import 'package:task_manager/ui/screen/menu_dashboard_screen.dart';
-import 'package:task_manager/ui/widget/custom_card.dart';
-import 'package:task_manager/ui/widget/search_bar.dart';
 import 'package:route_transitions/route_transitions.dart';
+
+import '../../core/bloc/database_bloc/database_bloc.dart';
+import '../../core/model/card_color_data_model.dart';
+import '../../core/model/task_model.dart';
+import '../../core/model/text_time_category_model.dart';
+import '../widget/custom_card.dart';
+import '../widget/search_bar.dart';
 import 'add_task_screen.dart';
 import 'detail_screen.dart';
+import 'menu_dashboard_screen.dart';
 
 class Home extends StatefulWidget {
   final Function onMenuTap;
@@ -112,18 +113,17 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Widget body() {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: ScreenUtil().setWidth(60),
-        right: ScreenUtil().setWidth(60),
-        bottom: ScreenUtil().setHeight(40),
-        top: ScreenUtil().setHeight(80),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(
+            left: ScreenUtil().setWidth(60),
+            right: ScreenUtil().setWidth(60),
+            top: ScreenUtil().setHeight(100),
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               profileImageMenu(),
@@ -135,21 +135,38 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               searchTask(),
             ],
           ),
-          pinnedTask(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              showAllText(),
-              SizedBox(height: ScreenUtil().setHeight(30)),
-              rowTextTimeCategory(),
-              SizedBox(
-                height: ScreenUtil().setHeight(20),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(60)),
+          child: pinnedTask(),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(60)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  showAllText(),
+                  SizedBox(height: ScreenUtil().setHeight(30)),
+                  rowTextTimeCategory(),
+                  SizedBox(
+                    height: ScreenUtil().setHeight(20),
+                  ),
+                ],
               ),
-              taskByCategory()
-            ],
-          )
-        ],
-      ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: ScreenUtil().setWidth(40),
+                  bottom: ScreenUtil().setWidth(60)),
+              child: taskByCategory(),
+            )
+          ],
+        )
+      ],
     );
   }
 
@@ -162,8 +179,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             child: Icon(
               Icons.sort,
               color: Colors.black,
-              size: ScreenUtil().setWidth(100),
+              size: ScreenUtil().setWidth(90),
             )),
+
         //
         // Account not yet implemented
         /*
@@ -232,7 +250,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   Widget searchTask() {
     return Container(
-      height: ScreenUtil().setHeight(150),
+      height: ScreenUtil().setHeight(180),
       width: double.infinity,
       decoration: BoxDecoration(
           color: Colors.grey.withOpacity(0.2),
@@ -287,7 +305,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     return BlocBuilder<DatabaseBloc, DatabaseState>(
       builder: (context, state) {
         if (state is HomePageTaskLoaded) {
-          if (state.pinnedList == null || state.pinnedList.length == 0)
+          if (state.pinnedTasks == null)
             return Container();
           else
             return DoughRecipe(
@@ -297,21 +315,23 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               ),
               child: PressableDough(
                 child: GestureDetector(
-                  onTap: () => Navigator.of(context, rootNavigator: true)
-                      .push(CupertinoPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) => DetailTask(
-                                tasks: state.pinnedList[0],
-                                function: refreshUI,
-                                fromNotification: false,
-                                fromEditor: false,
-                              ))),
+                  onTap: () {
+                    Navigator.of(context, rootNavigator: true)
+                        .push(CupertinoPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => DetailTask(
+                                  tasks: state.pinnedTasks,
+                                  function: refreshUI,
+                                  fromNotification: false,
+                                  fromEditor: false,
+                                )));
+                  },
                   child: Container(
-                    height: ScreenUtil().setHeight(200),
+                    height: ScreenUtil().setHeight(240),
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(20.0)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.3),
@@ -323,7 +343,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                     child: Padding(
                         padding: EdgeInsets.symmetric(
-                            vertical: ScreenUtil().setHeight(40),
+                            vertical: ScreenUtil().setHeight(60),
                             horizontal: ScreenUtil().setWidth(60)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -335,7 +355,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Flexible(
-                                    child: Text(state.pinnedList[0].taskName,
+                                    child: Text(state.pinnedTasks.taskName,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -413,12 +433,22 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 curves: Curves.easeInOut,
                 builder: (context) => MenuDashboard(currentIndexPage: 1)));
           },
-          child: Text(
-            'Show All',
-            style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Roboto-Medium',
-                fontSize: 16.0),
+          child: Container(
+            decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(ScreenUtil().setWidth(60))),
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
+                child: Text(
+                  'Show All',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'Roboto-Medium',
+                      fontSize: 14.0),
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -435,7 +465,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           laterList = state.laterList;
 
           return Container(
-              height: ScreenUtil().setHeight(530),
+              height: ScreenUtil().setHeight(550),
               child: IndexedStack(
                 index: _currentIndex,
                 children: <Widget>[
@@ -446,19 +476,24 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 ],
               ));
         } else
-          return Container();
+          return Container(
+            height: ScreenUtil().setHeight(550),
+          );
       },
     );
   }
 
   Widget listCard(List<Tasks> listTasks) {
+    List listForColorIndex = [];
+
     return ListView.builder(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.all(0.0),
         itemCount: listTasks.length,
         itemBuilder: (context, index) {
-          int colorIndex = cardColorData.getIndex(index);
+          if (listForColorIndex.length == 2) listForColorIndex = [];
+          int colorIndex = cardColorData.getIndex(index, listForColorIndex);
 
           return Padding(
             padding: EdgeInsets.only(right: ScreenUtil().setWidth(15)),
@@ -474,7 +509,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                             taskId: null,
                           ))),
               child: Container(
-                height: ScreenUtil().setWidth(500),
+                height: ScreenUtil().setWidth(530),
                 child: Padding(
                   padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
                   child: CustomCard(

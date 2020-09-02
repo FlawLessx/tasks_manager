@@ -63,9 +63,9 @@ class HomePageTaskLoaded extends DatabaseState {
   final List<Tasks> todayList;
   final List<Tasks> upcomingList;
   final List<Tasks> laterList;
-  final List<Tasks> pinnedList;
+  final Tasks pinnedTasks;
   HomePageTaskLoaded(
-      {this.pinnedList,
+      {this.pinnedTasks,
       this.recentlyList,
       this.todayList,
       this.upcomingList,
@@ -73,7 +73,7 @@ class HomePageTaskLoaded extends DatabaseState {
 
   @override
   List<Object> get props =>
-      [pinnedList, recentlyList, todayList, upcomingList, laterList];
+      [pinnedTasks, recentlyList, todayList, upcomingList, laterList];
 }
 
 class SearchTaskLoaded extends DatabaseState {

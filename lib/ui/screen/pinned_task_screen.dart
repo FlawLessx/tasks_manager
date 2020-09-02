@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
-import 'package:task_manager/ui/widget/custom_card.dart';
 
+import '../../core/bloc/database_bloc/database_bloc.dart';
+import '../widget/custom_card.dart';
 import 'detail_screen.dart';
 
 class PinnedTaskPage extends StatefulWidget {
@@ -33,7 +33,9 @@ class _PinnedTaskPageState extends State<PinnedTaskPage> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           leading: IconButton(
-              icon: Icon(Icons.sort), onPressed: () => widget.onMenuTap.call()),
+              icon: Icon(Icons.sort,
+                  size: ScreenUtil().setWidth(90), color: Colors.black),
+              onPressed: () => widget.onMenuTap.call()),
           elevation: 0.0,
           centerTitle: true,
           title: Text("Pinned Tasks"),

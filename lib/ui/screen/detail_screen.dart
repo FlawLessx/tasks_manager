@@ -8,17 +8,17 @@ import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:intl/intl.dart';
-import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
-import 'package:task_manager/core/model/reorder_list_model.dart';
-import 'package:task_manager/core/util/tasks_util.dart';
-import 'package:task_manager/ui/screen/add_task_screen.dart';
-import 'package:task_manager/ui/widget/custom_button.dart';
-import 'package:task_manager/core/model/task_detail_model.dart';
-import 'package:task_manager/core/model/task_model.dart';
-import 'package:task_manager/ui/widget/detail_task.dart';
-import 'package:task_manager/ui/widget/reorderable_item.dart';
-import 'package:task_manager/ui/widget/toast.dart';
 
+import '../../core/bloc/database_bloc/database_bloc.dart';
+import '../../core/model/reorder_list_model.dart';
+import '../../core/model/task_detail_model.dart';
+import '../../core/model/task_model.dart';
+import '../../core/util/tasks_util.dart';
+import '../widget/custom_button.dart';
+import '../widget/detail_task.dart';
+import '../widget/reorderable_item.dart';
+import '../widget/toast.dart';
+import 'add_task_screen.dart';
 import 'menu_dashboard_screen.dart';
 
 class DetailTask extends StatefulWidget {
@@ -41,6 +41,7 @@ class DetailTask extends StatefulWidget {
 class _DetailTaskState extends State<DetailTask> {
   //
   // VARIABLES
+  //
   ScrollController _scrollController;
   bool lastStatus = true;
   List<String> data = List();
@@ -58,6 +59,7 @@ class _DetailTaskState extends State<DetailTask> {
 
   //
   // INIT STATE
+  //
   @override
   void initState() {
     _scrollController = ScrollController();
@@ -85,6 +87,7 @@ class _DetailTaskState extends State<DetailTask> {
 
   //
   // DISPOSE
+  //
   @override
   void dispose() {
     _scrollController.removeListener(_scrollListener);
@@ -96,6 +99,7 @@ class _DetailTaskState extends State<DetailTask> {
 
   //
   // PAGE FUNCTION
+  //
   void refreshUI() {
     if (widget.fromNotification == true) {
       BlocProvider.of<DatabaseBloc>(context)
@@ -172,10 +176,14 @@ class _DetailTaskState extends State<DetailTask> {
     if (widget.fromNotification == true) {
       BlocProvider.of<DatabaseBloc>(context)
           .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
-      Navigator.push(
+      BlocProvider.of<DatabaseBloc>(context).add(GetHomePageTask());
+
+      Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-              builder: (context) => MenuDashboard(currentIndexPage: 0)));
+              builder: (context) => MenuDashboard(currentIndexPage: 0)),
+          (route) => false);
+      //Navigator.pop(context);
     }
   }
 
@@ -195,7 +203,8 @@ class _DetailTaskState extends State<DetailTask> {
   }
 
   //
-  // CALLBACK FUNCTION
+  // REORDERABLE LIST FUNCTION
+  //
   void deleteSubtask(Key key) {
     int index = _indexOfKey(key);
     setState(() {
@@ -230,6 +239,7 @@ class _DetailTaskState extends State<DetailTask> {
 
   //
   // PAGE BUILDER
+  //
 
   @override
   Widget build(BuildContext context) {
@@ -243,7 +253,6 @@ class _DetailTaskState extends State<DetailTask> {
             body: BlocListener<DatabaseBloc, DatabaseState>(
           listener: (context, state) {
             if (state is TaskLoaded) {
-              print(state.tasks.taskName);
               setState(() {
                 _tasks = state.tasks;
               });
@@ -254,11 +263,13 @@ class _DetailTaskState extends State<DetailTask> {
                 });
               }
             } else if (state is TaskNotFound) {
+              Navigator.pop(context);
+              /*
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          MenuDashboard(currentIndexPage: 0)));
+                          MenuDashboard(currentIndexPage: 0)));*/
             }
           },
           child: ReorderableList(

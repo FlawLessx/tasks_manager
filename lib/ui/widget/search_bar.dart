@@ -36,31 +36,40 @@ class SearchBar extends SearchDelegate<Tasks> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return Container();
+    databaseBloc.add(SearchTask(taskName: query));
+
+    return body();
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     databaseBloc.add(SearchTask(taskName: query));
 
+    return body();
+  }
+
+  Widget body() {
     return BlocBuilder<DatabaseBloc, DatabaseState>(
       builder: (context, state) {
         if (state is SearchTaskLoaded)
           return ListView.builder(
               itemCount: state.list.length,
               itemBuilder: (context, index) => ListTile(
-                    onTap: () => Navigator.of(context, rootNavigator: true)
-                        .push(CupertinoPageRoute(
-                            fullscreenDialog: true,
-                            builder: (context) => DetailTask(
-                                fromNotification: false,
-                                fromEditor: false,
-                                function: function,
-                                taskId: null,
-                                tasks: state.list[index]))),
+                    onTap: () {
+                      print(state.list[index].taskName);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DetailTask(
+                                  fromNotification: false,
+                                  fromEditor: false,
+                                  function: function,
+                                  taskId: null,
+                                  tasks: state.list[index])));
+                    },
                     leading: Icon(
                       Icons.description,
-                      size: ScreenUtil().setHeight(100),
+                      size: ScreenUtil().setHeight(90),
                     ),
                     title: RichText(
                         text: TextSpan(

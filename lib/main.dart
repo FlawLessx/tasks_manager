@@ -2,31 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:rxdart/subjects.dart';
-import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
-import 'package:task_manager/core/resources/hive_repository.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:hive/hive.dart';
-import 'package:task_manager/ui/screen/menu_dashboard_screen.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:rxdart/rxdart.dart';
 
+import 'core/bloc/database_bloc/database_bloc.dart';
 import 'core/model/notification_model.dart';
 import 'core/model/task_model.dart';
+import 'core/resources/hive_repository.dart';
+import 'ui/screen/menu_dashboard_screen.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
-
 final BehaviorSubject<ReceivedNotification> didReceiveLocalNotificationSubject =
     BehaviorSubject<ReceivedNotification>();
-
-final BehaviorSubject<String> selectNotificationSubject =
-    BehaviorSubject<String>();
+final BehaviorSubject<String> selectNotification = BehaviorSubject<String>();
 
 NotificationAppLaunchDetails notificationAppLaunchDetails;
+
+var locations;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Hive Initialized
+  //
+  // HIVE INITIALIZATION
+  //
   var dir = await getApplicationDocumentsDirectory();
   Hive.init(dir.path);
   Hive.registerAdapter(TasksAdapter());
@@ -34,10 +35,11 @@ void main() async {
   Hive.registerAdapter(TimeOfDayAdapter());
   await Hive.openBox('taskManager');
 
-  // Local Notification Initialized
+  //
+  // NOTIFICATION INITIALIZATION
+  //
   notificationAppLaunchDetails =
       await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
-
   var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
   var initializationSettingsIOS = IOSInitializationSettings(
       requestAlertPermission: false,
@@ -48,12 +50,15 @@ void main() async {
         didReceiveLocalNotificationSubject.add(ReceivedNotification(
             id: id, title: title, body: body, payload: payload));
       });
+
   var initializationSettings = InitializationSettings(
       initializationSettingsAndroid, initializationSettingsIOS);
+
   await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onSelectNotification: (String payload) async {
-    if (payload != null) {}
-    selectNotificationSubject.add(payload);
+    if (payload != null) {
+      selectNotification.add(payload);
+    }
   });
 
   // My App

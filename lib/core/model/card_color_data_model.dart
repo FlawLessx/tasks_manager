@@ -14,8 +14,6 @@ class CardColorData {
 }
 
 class CardColorList {
-  List tempList = [];
-
   List<CardColorData> listCardColorData = [
     CardColorData(
         cardColor: Colors.white,
@@ -29,13 +27,8 @@ class CardColorList {
         backgroundProgressColor: Colors.white.withOpacity(0.3)),
   ];
 
-  int getIndex(int index) {
-    if (index != 0) {
-      if (tempList.length == 2) tempList = [];
-
-      tempList.add(index);
-      return tempList.length - 1;
-    } else
-      return 0;
+  int getIndex(int index, List listData) {
+    listData.add(index);
+    return listData.length - 1;
   }
 }

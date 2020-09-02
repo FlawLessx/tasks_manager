@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
-import 'package:task_manager/core/model/task_model.dart';
+
+import '../model/task_model.dart';
 
 class HiveProvider {
   HiveProvider() : super() {

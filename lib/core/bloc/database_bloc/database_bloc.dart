@@ -1,13 +1,15 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/core/resources/hive_repository.dart';
-import 'package:task_manager/core/model/task_model.dart';
-import 'package:task_manager/core/model/timeline_object_model.dart';
-import 'package:task_manager/core/util/tasks_util.dart';
 import 'package:timeline_node/timeline_node.dart';
+
+import '../../model/task_model.dart';
+import '../../model/timeline_object_model.dart';
+import '../../resources/hive_repository.dart';
+import '../../util/tasks_util.dart';
 
 part 'database_event.dart';
 part 'database_state.dart';
@@ -62,6 +64,8 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
     Tasks result;
     int index;
 
+    print("event ${event.taskId}");
+
     if (event.taskId != null) {
       index = _tasksUtil.getIndex(data, event.taskId);
       result = await hiveRepository.getTaskByID(index);
@@ -70,10 +74,10 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
       result = await hiveRepository.getTaskByID(index);
     }
 
-    if (result != null)
-      yield TaskLoaded(tasks: result);
-    else
+    if (result == null)
       yield TaskNotFound();
+    else
+      yield TaskLoaded(tasks: result);
   }
 
   Stream<DatabaseState> _mapUpdateTaskToState(UpdateTask event) async* {
@@ -133,7 +137,7 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
                 tempList[i],
                 status),
           );
-        } else if (i == data.length - 1 || tempList.length == 2) {
+        } else if (i == tempList.length - 1) {
           list.add(
             TimelineObject(
                 TimelineNodeStyle(
@@ -168,13 +172,32 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
     List<Tasks> todayList = List();
     List<Tasks> upcomingList = List();
     List<Tasks> laterList = List();
+    final random = Random();
     var now = DateTime.now();
-    var upcomingStartDate = now.add(Duration(days: 1));
+    var upcomingStartDate = now;
     var upcomingEndDate = now.add(Duration(days: 3));
     var laterStartDate = now.add(Duration(days: 4));
     var laterEndDate = now.add(Duration(days: 30));
 
+    //
+    // FETCH DATA FROM DATABASE
+    //
     var data = await hiveRepository.getAllTask();
+
+    //
+    // GET RANDOM PINNED TASKS
+    //
+    Tasks _getRandomPinned() {
+      List<Tasks> tempData;
+      if (pinnedList.length != 0)
+        tempData = pinnedList;
+      else if (todayList.length != 0)
+        tempData = todayList;
+      else
+        tempData = data;
+
+      return tempData[random.nextInt(tempData.length)];
+    }
 
     if (data == null || data.length == 0)
       yield DatabaseEmpty();
@@ -185,25 +208,30 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
         } else {
           //
           // GET PINNED TASKS
+          //
           if (data[i].pinned == true) pinnedList.add(data[i]);
 
           //
           // GET RECENTLY TASKS
+          //
           bool recentlyStatus = _tasksUtil.checkTaskIfNow(data[i]);
           if (recentlyStatus == true) recentlyList.add(data[i]);
 
           //
           // GET TODAY TASKS
+          //
           if (data[i].date.day == now.day) todayList.add(data[i]);
 
           //
           // GET UPCOMING TASKS
+          //
           bool upcomingStatus = _tasksUtil.checkTimeBasedTasks(
               upcomingStartDate, upcomingEndDate, data[i]);
           if (upcomingStatus == true) upcomingList.add(data[i]);
 
           //
           // GET LATER TASKS
+          //
           bool laterStatus = _tasksUtil.checkTimeBasedTasks(
               laterStartDate, laterEndDate, data[i]);
           if (laterStatus == true) laterList.add(data[i]);
@@ -212,7 +240,7 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
     }
 
     yield HomePageTaskLoaded(
-        pinnedList: pinnedList.length != 0 ? pinnedList : data,
+        pinnedTasks: _getRandomPinned(),
         recentlyList: recentlyList,
         todayList: todayList,
         upcomingList: upcomingList,
@@ -222,13 +250,12 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
   Stream<DatabaseState> _mapSearchTaskToState(SearchTask event) async* {
     var data = await hiveRepository.getAllTask();
     List<Tasks> resultTasksList = List();
+    RegExp exp = new RegExp(
+      event.taskName,
+      caseSensitive: false,
+    );
 
     for (var tasks in data) {
-      RegExp exp = new RegExp(
-        event.taskName,
-        caseSensitive: false,
-      );
-
       if (exp.hasMatch(tasks.taskName)) resultTasksList.add(tasks);
     }
 

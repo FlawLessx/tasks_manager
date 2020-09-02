@@ -1,19 +1,20 @@
+import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:task_manager/core/bloc/database_bloc/database_bloc.dart';
-import 'package:task_manager/core/util/tasks_util.dart';
-import 'package:task_manager/ui/screen/add_task_screen.dart';
-import 'package:task_manager/ui/screen/menu_dashboard_screen.dart';
-import 'package:task_manager/ui/widget/date_picker.dart';
 import 'package:route_transitions/route_transitions.dart';
 import 'package:timeline_node/timeline_node.dart';
-import 'package:date_picker_timeline/date_picker_widget.dart';
-import 'detail_screen.dart';
+
+import '../../core/bloc/database_bloc/database_bloc.dart';
+import '../../core/util/tasks_util.dart';
+import '../widget/date_picker.dart';
 import '../widget/taskpage_card_layout.dart';
+import 'add_task_screen.dart';
+import 'detail_screen.dart';
+import 'menu_dashboard_screen.dart';
 
 class TasksPage extends StatefulWidget {
   final Function function;
@@ -43,6 +44,16 @@ class _TasksPageState extends State<TasksPage> {
     BlocProvider.of<DatabaseBloc>(context).add(GetTaskByDate(date: _date));
   }
 
+  _navigator() {
+    Navigator.of(context).push(PageRouteTransition(
+        animationType: AnimationType.slide_left,
+        curves: Curves.easeInOut,
+        fullscreenDialog: true,
+        maintainState: true,
+        builder: (context) => MenuDashboard(currentIndexPage: 0)));
+    if (widget.function != null) widget.function.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     /*Timer.periodic(Duration(seconds: 1), (timer) {
@@ -51,14 +62,7 @@ class _TasksPageState extends State<TasksPage> {
 
     return WillPopScope(
       onWillPop: () async {
-        widget.function != null ?? widget.function.call();
-
-        Navigator.of(context).push(PageRouteTransition(
-            animationType: AnimationType.slide_left,
-            curves: Curves.easeInOut,
-            fullscreenDialog: true,
-            maintainState: true,
-            builder: (context) => MenuDashboard(currentIndexPage: 0)));
+        _navigator();
         return true;
       },
       child: Scaffold(
@@ -67,17 +71,7 @@ class _TasksPageState extends State<TasksPage> {
             elevation: 0.0,
             leading: IconButton(
                 icon: Icon(Icons.chevron_left, color: Colors.black),
-                onPressed: () {
-                  widget.function != null ?? widget.function.call();
-
-                  Navigator.of(context).push(PageRouteTransition(
-                      animationType: AnimationType.slide_left,
-                      curves: Curves.easeInOut,
-                      fullscreenDialog: true,
-                      maintainState: true,
-                      builder: (context) =>
-                          MenuDashboard(currentIndexPage: 0)));
-                }),
+                onPressed: _navigator),
             actions: <Widget>[
               IconButton(
                 onPressed: () {
