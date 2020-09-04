@@ -5,18 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../main.dart';
-import '../model/notification_model.dart';
 import '../model/task_model.dart';
 
 class NotificationPlugin {
-  NotificationPlugin._() {
-    _requestIOSPermissions();
-  }
+  NotificationPlugin._();
 
   //
   // REQUEST PERMISSION
   //
-  void _requestIOSPermissions() {
+  void requestIOSPermissions() {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>()
@@ -25,23 +22,6 @@ class NotificationPlugin {
           badge: true,
           sound: true,
         );
-  }
-
-  //
-  // SELECTED NOTIFICATION
-  //
-  void configureSelectNotificationSubject(Function onSelectNotification) async {
-    selectNotification.listen((payload) {
-      onSelectNotification(payload);
-    });
-  }
-
-  void configureDidReceiveLocalNotificationSubject(
-      Function onDidReceiveNotification) {
-    didReceiveLocalNotificationSubject
-        .listen((ReceivedNotification receivedNotification) async {
-      onDidReceiveNotification(receivedNotification);
-    });
   }
 
   //
@@ -63,6 +43,7 @@ class NotificationPlugin {
         'your other channel description',
         playSound: true,
         icon: 'app_icon',
+        largeIcon: DrawableResourceAndroidBitmap('app_icon'),
         sound: RawResourceAndroidNotificationSound('google_event'),
         vibrationPattern: vibrationPattern,
         priority: Priority.High,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:task_manager/main.dart';
 
 import '../../core/bloc/database_bloc/database_bloc.dart';
 import '../widget/custom_card.dart';
@@ -58,16 +59,14 @@ class _PinnedTaskPageState extends State<PinnedTaskPage> {
                         ),
                         child: GestureDetector(
                           onTap: () =>
-                              Navigator.of(context, rootNavigator: true)
-                                  .push(CupertinoPageRoute(
-                                      fullscreenDialog: true,
-                                      builder: (context) => DetailTask(
-                                            function: refreshUI,
-                                            tasks: state.listTasks[index],
-                                            fromNotification: false,
-                                            taskId: null,
-                                            fromEditor: false,
-                                          ))),
+                              Navigator.pushNamed(context, detailTaskRoute,
+                                  arguments: DetailTaskArguments(
+                                    function: refreshUI,
+                                    tasks: state.listTasks[index],
+                                    fromNotification: false,
+                                    taskId: null,
+                                    fromEditor: false,
+                                  )),
                           child: CustomCard(
                               tasks: state.listTasks[index],
                               returnFunction: refreshUI,

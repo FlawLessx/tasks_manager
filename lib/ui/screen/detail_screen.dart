@@ -1,6 +1,7 @@
 import 'package:dough/dough.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:intl/intl.dart';
+import 'package:task_manager/main.dart';
 
 import '../../core/bloc/database_bloc/database_bloc.dart';
 import '../../core/model/reorder_list_model.dart';
@@ -18,8 +20,22 @@ import '../widget/custom_button.dart';
 import '../widget/detail_task.dart';
 import '../widget/reorderable_item.dart';
 import '../widget/toast.dart';
-import 'add_task_screen.dart';
+import 'task_editor_screen.dart';
 import 'menu_dashboard_screen.dart';
+
+class DetailTaskArguments {
+  final Tasks tasks;
+  final String taskId;
+  final Function function;
+  final bool fromNotification;
+  final bool fromEditor;
+  DetailTaskArguments(
+      {@required this.tasks,
+      @required this.function,
+      this.taskId,
+      @required this.fromNotification,
+      @required this.fromEditor});
+}
 
 class DetailTask extends StatefulWidget {
   final Tasks tasks;
@@ -157,33 +173,21 @@ class _DetailTaskState extends State<DetailTask> {
   }
 
   _navigator() {
+    BlocProvider.of<DatabaseBloc>(context)
+        .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
+
     if (widget.fromNotification == false) {
-      BlocProvider.of<DatabaseBloc>(context)
-          .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
       Navigator.pop(context);
       if (widget.function != null) widget.function.call();
-    }
-
-    if (widget.fromEditor == true) {
-      BlocProvider.of<DatabaseBloc>(context)
-          .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MenuDashboard(currentIndexPage: 0)));
-    }
-
-    if (widget.fromNotification == true) {
-      BlocProvider.of<DatabaseBloc>(context)
-          .add(UpdateTask(tasks: _saveTasks(_tasks, _tasks.isDone)));
+    } else if (widget.fromEditor == true) {
+      Navigator.pushNamed(context, homeRoute);
+    } else {
       BlocProvider.of<DatabaseBloc>(context).add(GetHomePageTask());
 
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MenuDashboard(currentIndexPage: 0)),
-          (route) => false);
-      //Navigator.pop(context);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil(homeRoute, (route) => false);
+      });
     }
   }
 
@@ -263,13 +267,10 @@ class _DetailTaskState extends State<DetailTask> {
                 });
               }
             } else if (state is TaskNotFound) {
-              Navigator.pop(context);
-              /*
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          MenuDashboard(currentIndexPage: 0)));*/
+              //Navigator.pop(context);
+
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil(homeRoute, (route) => false);
             }
           },
           child: ReorderableList(
@@ -410,16 +411,14 @@ class _DetailTaskState extends State<DetailTask> {
                         .add(UpdateTask(tasks: savedTasks));
                     _reoderableItems.clear();
 
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AddTask(
-                                  isNew: false,
-                                  function: refreshUI,
-                                  task: savedTasks,
-                                  fromHome: false,
-                                  fromTaskPage: false,
-                                )));
+                    Navigator.pushNamed(context, taskEditorRoute,
+                        arguments: TaskEditorArguments(
+                          isNew: false,
+                          function: refreshUI,
+                          task: savedTasks,
+                          fromHome: false,
+                          fromTaskPage: false,
+                        ));
                   });
             } else {
               return Container();

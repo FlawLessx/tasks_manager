@@ -1,17 +1,17 @@
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:task_manager/core/model/notification_model.dart';
+import 'package:task_manager/core/util/local_notification_helper.dart';
 
 import '../../main.dart';
 import 'detail_screen.dart';
 import 'homepage_screen.dart';
 import 'pinned_task_screen.dart';
-import 'tasks_page_screen.dart';
+import 'all_task_screen.dart';
 
 class MenuDashboard extends StatefulWidget {
   final int currentIndexPage;
@@ -35,7 +35,7 @@ class _MenuDashboardState extends State<MenuDashboard>
   @override
   void initState() {
     requestPermission();
-    _requestIOSPermissions();
+    notificationPlugin.requestIOSPermissions();
     if (didReceiveLocalNotificationSubject.isClosed == false)
       configureDidReceiveLocalNotificationSubject();
     if (selectNotification.isClosed == false)
@@ -59,25 +59,10 @@ class _MenuDashboardState extends State<MenuDashboard>
   }
 
   //
-  // NOTIFICATION FUNCTION
-  //
-  void _requestIOSPermissions() {
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-  }
-
-  //
   // SELECTED NOTIFICATION
   //
   void configureSelectNotificationSubject() {
     selectNotification.stream.listen((String payload) async {
-      print(payload);
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -151,7 +136,7 @@ class _MenuDashboardState extends State<MenuDashboard>
         onMenuTap: function,
       );
     else if (index == 1)
-      return TasksPage(
+      return AllTask(
         onMenuTap: function,
       );
     else
@@ -173,7 +158,7 @@ class _MenuDashboardState extends State<MenuDashboard>
 
     return Material(
       child: FancyDrawerWrapper(
-          backgroundColor: Colors.black.withOpacity(0.85),
+          backgroundColor: Colors.black.withOpacity(0.92),
           drawerItems: [
             menuItems(70, () {
               setState(() {

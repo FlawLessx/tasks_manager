@@ -5,13 +5,16 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:task_manager/core/util/route_generator.dart';
 
 import 'core/bloc/database_bloc/database_bloc.dart';
 import 'core/model/notification_model.dart';
 import 'core/model/task_model.dart';
 import 'core/resources/hive_repository.dart';
-import 'ui/screen/menu_dashboard_screen.dart';
 
+//
+// NOTIFICATION VARIABLES
+//
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 final BehaviorSubject<ReceivedNotification> didReceiveLocalNotificationSubject =
@@ -20,7 +23,14 @@ final BehaviorSubject<String> selectNotification = BehaviorSubject<String>();
 
 NotificationAppLaunchDetails notificationAppLaunchDetails;
 
-var locations;
+//
+// ROUTE VARIABLES
+//
+const String homeRoute = '/';
+const String allTaskRoute = '/allTask';
+const String pinnedRoute = '/pinned';
+const String taskEditorRoute = '/taskEditor';
+const String detailTaskRoute = '/detailTask';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +80,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     HiveRepository repository = HiveRepository();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    RouteGenerator routeGenerator = RouteGenerator();
 
     return MultiBlocProvider(
         providers: [
@@ -78,12 +89,14 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: MaterialApp(
-            title: 'Task Manager',
-            theme: ThemeData(
-                primaryColor: Color(0xFFfabb18),
-                scaffoldBackgroundColor: Colors.white,
-                cursorColor: Color(0xFFfabb18),
-                fontFamily: 'Roboto'),
-            home: MenuDashboard(currentIndexPage: 0)));
+          onGenerateRoute: routeGenerator.onGenerateRoute,
+          initialRoute: homeRoute,
+          title: 'Task Manager',
+          theme: ThemeData(
+              primaryColor: Color(0xFFfabb18),
+              scaffoldBackgroundColor: Colors.white,
+              cursorColor: Color(0xFFfabb18),
+              fontFamily: 'Roboto'),
+        ));
   }
 }

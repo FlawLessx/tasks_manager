@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -31,7 +31,6 @@ dependencies:
   timeline_node: ^0.1.0
   date_picker_timeline: ^1.2.0
   flutter_animation_progress_bar: ^1.0.0
-  route_transitions: ^1.0.2
   flutter_keyboard_visibility: ^3.2.1
   chips_choice: ^1.2.0
   intl:
@@ -79,7 +78,6 @@ flutter:
   #   - images/a_dot_ham.jpeg
 
   assets:
-    - src/animation/
     - src/img/
 
   # An image asset can refer to one or more resolution-specific "variants", see

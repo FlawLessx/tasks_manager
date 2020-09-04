@@ -3,15 +3,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:route_transitions/route_transitions.dart';
 
 import '../../core/bloc/database_bloc/database_bloc.dart';
 import '../../core/model/card_color_data_model.dart';
 import '../../core/model/task_model.dart';
 import '../../core/model/text_time_category_model.dart';
+import '../../main.dart';
 import '../widget/custom_card.dart';
 import '../widget/search_bar.dart';
-import 'add_task_screen.dart';
+import 'task_editor_screen.dart';
 import 'detail_screen.dart';
 import 'menu_dashboard_screen.dart';
 
@@ -97,16 +97,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         extendBodyBehindAppBar: true,
         floatingActionButton: FloatingActionButton(
           backgroundColor: Theme.of(context).primaryColor,
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).push(CupertinoPageRoute(
-                fullscreenDialog: true,
-                builder: (context) => AddTask(
-                      isNew: true,
-                      function: refreshUI,
-                      fromHome: true,
-                      fromTaskPage: false,
-                    )));
-          },
+          onPressed: () => Navigator.pushNamed(context, taskEditorRoute,
+              arguments: TaskEditorArguments(
+                  isNew: true,
+                  function: refreshUI,
+                  fromHome: true,
+                  fromTaskPage: false)),
           child: Icon(Icons.create, color: Colors.black),
         ),
         body: body());
@@ -315,17 +311,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               ),
               child: PressableDough(
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context, rootNavigator: true)
-                        .push(CupertinoPageRoute(
-                            fullscreenDialog: true,
-                            builder: (context) => DetailTask(
-                                  tasks: state.pinnedTasks,
-                                  function: refreshUI,
-                                  fromNotification: false,
-                                  fromEditor: false,
-                                )));
-                  },
+                  onTap: () => Navigator.pushNamed(context, detailTaskRoute,
+                      arguments: DetailTaskArguments(
+                        tasks: state.pinnedTasks,
+                        function: refreshUI,
+                        fromNotification: false,
+                        fromEditor: false,
+                      )),
                   child: Container(
                     height: ScreenUtil().setHeight(240),
                     width: double.infinity,
@@ -427,12 +419,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               color: Colors.black, fontFamily: 'Roboto-Bold', fontSize: 22.0),
         ),
         GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(PageRouteTransition(
-                animationType: AnimationType.slide_right,
-                curves: Curves.easeInOut,
-                builder: (context) => MenuDashboard(currentIndexPage: 1)));
-          },
+          onTap: () => Navigator.pushNamed(context, allTaskRoute),
           child: Container(
             decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,

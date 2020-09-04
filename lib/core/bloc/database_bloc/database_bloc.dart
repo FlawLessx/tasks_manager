@@ -64,8 +64,6 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
     Tasks result;
     int index;
 
-    print("event ${event.taskId}");
-
     if (event.taskId != null) {
       index = _tasksUtil.getIndex(data, event.taskId);
       result = await hiveRepository.getTaskByID(index);
@@ -196,7 +194,9 @@ class DatabaseBloc extends Bloc<DatabaseEvent, DatabaseState> {
       else
         tempData = data;
 
-      return tempData[random.nextInt(tempData.length)];
+      return tempData.length != 0
+          ? tempData[random.nextInt(tempData.length)]
+          : null;
     }
 
     if (data == null || data.length == 0)

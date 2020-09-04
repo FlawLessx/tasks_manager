@@ -5,26 +5,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:route_transitions/route_transitions.dart';
+import 'package:task_manager/main.dart';
 import 'package:timeline_node/timeline_node.dart';
 
 import '../../core/bloc/database_bloc/database_bloc.dart';
 import '../../core/util/tasks_util.dart';
 import '../widget/date_picker.dart';
 import '../widget/taskpage_card_layout.dart';
-import 'add_task_screen.dart';
+import 'task_editor_screen.dart';
 import 'detail_screen.dart';
 import 'menu_dashboard_screen.dart';
 
-class TasksPage extends StatefulWidget {
+class AllTask extends StatefulWidget {
   final Function function;
   final Function onMenuTap;
-  TasksPage({Key key, this.function, this.onMenuTap}) : super(key: key);
+  AllTask({Key key, this.function, this.onMenuTap}) : super(key: key);
 
-  _TasksPageState createState() => _TasksPageState();
+  _AllTaskState createState() => _AllTaskState();
 }
 
-class _TasksPageState extends State<TasksPage> {
+class _AllTaskState extends State<AllTask> {
   var _date = DateTime.now();
   TasksUtil _tasksUtil = TasksUtil();
 
@@ -45,12 +45,7 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   _navigator() {
-    Navigator.of(context).push(PageRouteTransition(
-        animationType: AnimationType.slide_left,
-        curves: Curves.easeInOut,
-        fullscreenDialog: true,
-        maintainState: true,
-        builder: (context) => MenuDashboard(currentIndexPage: 0)));
+    Navigator.pushNamed(context, homeRoute);
     if (widget.function != null) widget.function.call();
   }
 
@@ -152,15 +147,12 @@ class _TasksPageState extends State<TasksPage> {
 
   Widget addNewTask() {
     return GestureDetector(
-      onTap: () =>
-          Navigator.of(context, rootNavigator: true).push(CupertinoPageRoute(
-              fullscreenDialog: true,
-              builder: (context) => AddTask(
-                    function: refreshUI,
-                    isNew: true,
-                    fromHome: false,
-                    fromTaskPage: true,
-                  ))),
+      onTap: () => Navigator.pushNamed(context, taskEditorRoute,
+          arguments: TaskEditorArguments(
+              isNew: true,
+              function: refreshUI,
+              fromHome: false,
+              fromTaskPage: true)),
       child: Container(
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(
@@ -259,15 +251,14 @@ class _TasksPageState extends State<TasksPage> {
                   child: Padding(
                       padding: EdgeInsets.all(4),
                       child: GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => DetailTask(
-                                    tasks: state.list[index].tasks,
-                                    function: refreshUI,
-                                    fromNotification: false,
-                                    fromEditor: false,
-                                  )));
-                        },
+                        onTap: () =>
+                            Navigator.pushNamed(context, detailTaskRoute,
+                                arguments: DetailTaskArguments(
+                                  tasks: state.list[index].tasks,
+                                  function: refreshUI,
+                                  fromNotification: false,
+                                  fromEditor: false,
+                                )),
                         child: cardLayout(taskName, description, participants,
                             startTime, status, () {
                           setState(() {

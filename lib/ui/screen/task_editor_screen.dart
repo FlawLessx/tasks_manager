@@ -11,6 +11,7 @@ import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:intl/intl.dart';
+import 'package:task_manager/main.dart';
 
 import '../../core/bloc/database_bloc/database_bloc.dart';
 import '../../core/model/category_model.dart';
@@ -26,14 +27,31 @@ import '../widget/time_picker.dart';
 import 'detail_screen.dart';
 import 'menu_dashboard_screen.dart';
 
-class AddTask extends StatefulWidget {
+class TaskEditorArguments {
   final bool isNew;
   final Function function;
   final Function onMenuTap;
   final Tasks task;
   final bool fromHome;
   final bool fromTaskPage;
-  AddTask(
+
+  TaskEditorArguments(
+      {@required this.isNew,
+      @required this.function,
+      @required this.fromHome,
+      @required this.fromTaskPage,
+      this.task,
+      this.onMenuTap});
+}
+
+class TaskEditor extends StatefulWidget {
+  final bool isNew;
+  final Function function;
+  final Function onMenuTap;
+  final Tasks task;
+  final bool fromHome;
+  final bool fromTaskPage;
+  TaskEditor(
       {@required this.isNew,
       @required this.function,
       @required this.fromHome,
@@ -42,10 +60,10 @@ class AddTask extends StatefulWidget {
       this.onMenuTap});
 
   @override
-  _AddTaskState createState() => _AddTaskState();
+  _TaskEditorState createState() => _TaskEditorState();
 }
 
-class _AddTaskState extends State<AddTask> {
+class _TaskEditorState extends State<TaskEditor> {
   //
   // PAGE UTIL
   //
@@ -113,7 +131,7 @@ class _AddTaskState extends State<AddTask> {
 
   //
   // PAGE FUNCTION
-
+  //
   Tasks _saveTasks() {
     var rand = Random();
 
@@ -165,10 +183,7 @@ class _AddTaskState extends State<AddTask> {
     if (widget.fromHome == true) {
       Navigator.pop(context);
     } else if (widget.fromTaskPage == true) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MenuDashboard(currentIndexPage: 1)));
+      Navigator.pushNamed(context, allTaskRoute);
     } else {
       Navigator.pop(context);
     }
@@ -197,15 +212,13 @@ class _AddTaskState extends State<AddTask> {
         BlocProvider.of<DatabaseBloc>(context)
             .add(UpdateTask(tasks: _saveTasks()));
 
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => DetailTask(
-                      tasks: widget.task,
-                      fromNotification: false,
-                      function: null,
-                      fromEditor: true,
-                    )));
+        Navigator.pushReplacementNamed(context, detailTaskRoute,
+            arguments: DetailTaskArguments(
+              tasks: widget.task,
+              fromNotification: false,
+              function: null,
+              fromEditor: true,
+            ));
       }
     }
   }
@@ -352,7 +365,7 @@ class _AddTaskState extends State<AddTask> {
   Widget title() {
     return Text(widget.isNew == true ? 'Create \nNew Tasks' : 'Edit Tasks',
         style: TextStyle(
-            color: Colors.black, fontFamily: 'Roboto-Bold', fontSize: 25.0));
+            color: Colors.black, fontFamily: 'Roboto-Bold', fontSize: 26.0));
   }
 
   Widget taskTitleTextfield() {
@@ -426,7 +439,7 @@ class _AddTaskState extends State<AddTask> {
                 ? DateFormat('EEEE dd, MMMM yyyy').format(_selectedDate)
                 : 'Pick Date',
             style: TextStyle(
-                fontSize: 14.0,
+                fontSize: 15.0,
                 color: (_selectedDate != null) ? Colors.black : Colors.black54),
           )
         ],
@@ -474,7 +487,7 @@ class _AddTaskState extends State<AddTask> {
                 ? '${_startTime.format(context)} - ${_endTime != null ? _endTime.format(context) : ""}'
                 : 'Pick Time',
             style: TextStyle(
-                fontSize: 14.0,
+                fontSize: 15.0,
                 color: (_startTime != null) ? Colors.black : Colors.black54),
           )
         ],
@@ -521,7 +534,7 @@ class _AddTaskState extends State<AddTask> {
                     textCapitalization: TextCapitalization.words,
                     cursorColor: Colors.black,
                     onEditingComplete: () => FocusScope.of(context).unfocus(),
-                    style: TextStyle(fontSize: 14.0, fontFamily: 'Roboto'),
+                    style: TextStyle(fontSize: 15.0),
                     decoration: InputDecoration(
                       hintText: 'Insert Location',
                       border: InputBorder.none,
