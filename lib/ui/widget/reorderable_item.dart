@@ -126,8 +126,8 @@ class _ReoderableItemState extends State<ReoderableItem> {
                                   color: Colors.grey,
                                   fontStyle: FontStyle.italic,
                                   decoration: TextDecoration.lineThrough,
-                                )
-                              : null,
+                                  fontSize: 16)
+                              : TextStyle(color: Colors.black, fontSize: 16),
                           onChanged: (value) {
                             setState(() {
                               firstBuild = false;

@@ -267,8 +267,6 @@ class _DetailTaskState extends State<DetailTask> {
                 });
               }
             } else if (state is TaskNotFound) {
-              //Navigator.pop(context);
-
               Navigator.of(context)
                   .pushNamedAndRemoveUntil(homeRoute, (route) => false);
             }
@@ -317,7 +315,10 @@ class _DetailTaskState extends State<DetailTask> {
                     SizedBox(
                       height: ScreenUtil().setHeight(30),
                     ),
-                    participantsTags(),
+                    Padding(
+                      padding: EdgeInsets.only(left: ScreenUtil().setWidth(60)),
+                      child: participantsTags(),
+                    ),
                     SizedBox(height: ScreenUtil().setHeight(30)),
                     subtaskText(),
                     SizedBox(height: ScreenUtil().setHeight(30)),
@@ -438,7 +439,8 @@ class _DetailTaskState extends State<DetailTask> {
                       ? widget.tasks.taskId
                       : widget.taskId));
               if (widget.function != null) widget.function.call();
-              Navigator.pop(context);
+              Navigator.pushNamedAndRemoveUntil(
+                  context, homeRoute, (route) => false);
             }),
       ],
       flexibleSpace: FlexibleSpaceBar(
@@ -477,10 +479,10 @@ class _DetailTaskState extends State<DetailTask> {
                       child: Text(
                         state.tasks.taskName,
                         overflow: TextOverflow.ellipsis,
-                        maxLines: 3,
+                        maxLines: 2,
                         style: TextStyle(
                             fontFamily: 'Roboto-Bold',
-                            fontSize: 20,
+                            fontSize: 21,
                             color: Colors.black87),
                       ),
                     ),
@@ -502,7 +504,7 @@ class _DetailTaskState extends State<DetailTask> {
           color: Colors.black87,
           fontFamily: 'Roboto-Medium',
           decoration: TextDecoration.none,
-          fontSize: 16.0),
+          fontSize: 17.0),
     );
   }
 
@@ -539,7 +541,7 @@ class _DetailTaskState extends State<DetailTask> {
           color: Colors.black87,
           fontFamily: 'Roboto-Medium',
           decoration: TextDecoration.none,
-          fontSize: 16.0),
+          fontSize: 17.0),
     );
   }
 
@@ -556,6 +558,7 @@ class _DetailTaskState extends State<DetailTask> {
                       index: index,
                       title: _tasks.participants[index],
                       active: true,
+                      textStyle: TextStyle(fontSize: 16),
                       combine: ItemTagsCombine.withTextBefore,
                       color: Theme.of(context).primaryColor,
                       activeColor: Theme.of(context).primaryColor,
@@ -574,13 +577,8 @@ class _DetailTaskState extends State<DetailTask> {
                     );
                   },
                 )
-              : Padding(
-                  padding: EdgeInsets.only(left: ScreenUtil().setWidth(60)),
-                  child: Text("No Participants",
-                      style: TextStyle(
-                        color: Colors.black,
-                      )),
-                );
+              : Text("No Participants",
+                  style: TextStyle(color: Colors.black, fontSize: 16));
         } else
           return Container();
       },
@@ -594,7 +592,7 @@ class _DetailTaskState extends State<DetailTask> {
           color: Colors.black87,
           fontFamily: 'Roboto-Medium',
           decoration: TextDecoration.none,
-          fontSize: 16.0),
+          fontSize: 17.0),
     );
   }
 
@@ -605,7 +603,7 @@ class _DetailTaskState extends State<DetailTask> {
           color: Colors.black87,
           fontFamily: 'Roboto-Medium',
           decoration: TextDecoration.none,
-          fontSize: 16.0),
+          fontSize: 17.0),
     );
   }
 
@@ -619,9 +617,7 @@ class _DetailTaskState extends State<DetailTask> {
                 state.tasks.description != ""
                     ? state.tasks.description
                     : "No Description",
-                style: TextStyle(
-                  color: Colors.black,
-                )),
+                style: TextStyle(color: Colors.black, fontSize: 16)),
           );
         } else
           return Container();

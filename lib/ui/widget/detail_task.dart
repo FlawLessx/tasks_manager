@@ -44,7 +44,7 @@ class _DetailTaskWidgetState extends State<DetailTaskWidget> {
             style: TextStyle(
                 decoration: TextDecoration.none,
                 fontStyle: FontStyle.normal,
-                fontSize: 15.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.normal,
                 color: (widget.text == "") ? Colors.black54 : Colors.black),
           )

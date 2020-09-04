@@ -18,7 +18,9 @@ import 'detail_screen.dart';
 class AllTask extends StatefulWidget {
   final Function function;
   final Function onMenuTap;
-  AllTask({Key key, this.function, this.onMenuTap}) : super(key: key);
+  final bool fromMenu;
+  AllTask({Key key, this.function, this.onMenuTap, @required this.fromMenu})
+      : super(key: key);
 
   _AllTaskState createState() => _AllTaskState();
 }
@@ -44,7 +46,10 @@ class _AllTaskState extends State<AllTask> {
   }
 
   _navigator() {
-    Navigator.pushNamed(context, homeRoute);
+    if (widget.fromMenu == false)
+      Navigator.pop(context);
+    else
+      Navigator.pushNamed(context, homeRoute);
     if (widget.function != null) widget.function.call();
   }
 

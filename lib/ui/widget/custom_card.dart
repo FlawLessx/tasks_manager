@@ -123,7 +123,7 @@ class CustomCard extends StatelessWidget {
                           style: TextStyle(
                               color: Colors.grey,
                               fontWeight: FontWeight.w400,
-                              fontSize: 13.0),
+                              fontSize: 14.0),
                         ),
                       ),
                     ],

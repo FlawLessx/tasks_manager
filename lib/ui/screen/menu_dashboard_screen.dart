@@ -138,6 +138,7 @@ class _MenuDashboardState extends State<MenuDashboard>
     else if (index == 1)
       return AllTask(
         onMenuTap: function,
+        fromMenu: true,
       );
     else
       return PinnedTaskPage(

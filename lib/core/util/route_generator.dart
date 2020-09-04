@@ -31,6 +31,7 @@ class RouteGenerator {
                 isNew: args.isNew,
                 function: args.function,
                 fromHome: args.fromHome,
+                task: args.task,
                 fromTaskPage: args.fromTaskPage),
             settings: settings,
             fullscreenDialog: true);

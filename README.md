@@ -1,16 +1,22 @@
-# task_manager
+# Tasks Manager
 
-A new Flutter project.
+Application that help you manage tasks & event
 
-## Getting Started
+## Screenshot
 
-This project is a starting point for a Flutter application.
+<img src="src/screenshot/ss_homepage.png" width="23%"></img> <img src="src/screenshot/ss_all_task.png" width="23%"></img> <img src="src/screenshot/ss_detail_screen.png" width="23%"></img> <img src="src/screenshot/ss_menu.png" width="23%"></img> <img src="src/screenshot/ss_notification.png" width="23%"></img> <img src="src/screenshot/ss_task_editor.png" width="23%"></img>
 
-A few resources to get you started if this is your first Flutter project:
+## Changelog
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+### v1.0.0+2
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Refactoring code and fixed some following bugs:
+
+* Showing different tasks in detail screen when open a tasks
+* Subtask in editor not showing
+* If participants null it will showing description (Detail Screen)
+* Can't navigate if open app from notification
+
+### v1.0.0+1
+
+* Initial Release

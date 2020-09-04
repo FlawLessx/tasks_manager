@@ -55,7 +55,7 @@ class TaskEditor extends StatefulWidget {
       @required this.function,
       @required this.fromHome,
       @required this.fromTaskPage,
-      this.task,
+      @required this.task,
       this.onMenuTap});
 
   @override
@@ -327,7 +327,7 @@ class _TaskEditorState extends State<TaskEditor> {
               SizedBox(height: ScreenUtil().setHeight(60)),
               Text(
                 'Description',
-                style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
+                style: TextStyle(fontSize: 16.0, fontFamily: 'Roboto-Bold'),
               ),
               SizedBox(height: ScreenUtil().setHeight(30)),
               _descriptionController.text == ""
@@ -336,7 +336,7 @@ class _TaskEditorState extends State<TaskEditor> {
               SizedBox(height: ScreenUtil().setHeight(60)),
               Text(
                 'Participants',
-                style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
+                style: TextStyle(fontSize: 16.0, fontFamily: 'Roboto-Bold'),
               ),
               participantTextfield(),
               SizedBox(height: ScreenUtil().setHeight(15)),
@@ -344,13 +344,13 @@ class _TaskEditorState extends State<TaskEditor> {
               SizedBox(height: ScreenUtil().setHeight(60)),
               Text(
                 'Category',
-                style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
+                style: TextStyle(fontSize: 16.0, fontFamily: 'Roboto-Bold'),
               ),
               chipsCategory(),
               SizedBox(height: ScreenUtil().setHeight(60)),
               Text(
                 'SubTask',
-                style: TextStyle(fontSize: 15.0, fontFamily: 'Roboto-Bold'),
+                style: TextStyle(fontSize: 16.0, fontFamily: 'Roboto-Bold'),
               ),
               listSubtask(),
               SizedBox(height: ScreenUtil().setHeight(300)),
@@ -382,7 +382,7 @@ class _TaskEditorState extends State<TaskEditor> {
               focusNode: _titleFocusNode,
               cursorColor: Colors.black,
               textCapitalization: TextCapitalization.words,
-              style: TextStyle(fontFamily: 'Roboto-Medium', fontSize: 18),
+              style: TextStyle(fontFamily: 'Roboto-Medium', fontSize: 19),
               decoration: InputDecoration(
                 hintText: 'Tasks title',
                 hintStyle: TextStyle(fontFamily: 'Roboto-Medium', fontSize: 18),
@@ -438,7 +438,7 @@ class _TaskEditorState extends State<TaskEditor> {
                 ? DateFormat('EEEE dd, MMMM yyyy').format(_selectedDate)
                 : 'Pick Date',
             style: TextStyle(
-                fontSize: 15.0,
+                fontSize: 16.0,
                 color: (_selectedDate != null) ? Colors.black : Colors.black54),
           )
         ],
@@ -486,7 +486,7 @@ class _TaskEditorState extends State<TaskEditor> {
                 ? '${_startTime.format(context)} - ${_endTime != null ? _endTime.format(context) : ""}'
                 : 'Pick Time',
             style: TextStyle(
-                fontSize: 15.0,
+                fontSize: 16.0,
                 color: (_startTime != null) ? Colors.black : Colors.black54),
           )
         ],
@@ -533,7 +533,7 @@ class _TaskEditorState extends State<TaskEditor> {
                     textCapitalization: TextCapitalization.words,
                     cursorColor: Colors.black,
                     onEditingComplete: () => FocusScope.of(context).unfocus(),
-                    style: TextStyle(fontSize: 15.0),
+                    style: TextStyle(fontSize: 16.0),
                     decoration: InputDecoration(
                       hintText: 'Insert Location',
                       border: InputBorder.none,
@@ -586,7 +586,7 @@ class _TaskEditorState extends State<TaskEditor> {
               style: TextStyle(
                   color: Colors.grey,
                   fontFamily: 'Roboto-Medium',
-                  fontSize: 14),
+                  fontSize: 16),
             )),
           )),
     );
@@ -614,6 +614,7 @@ class _TaskEditorState extends State<TaskEditor> {
           key: Key(index.toString()),
           index: index,
           title: _participants[index],
+          textStyle: TextStyle(fontSize: 16),
           active: true,
           combine: ItemTagsCombine.withTextBefore,
           color: Theme.of(context).primaryColor,
@@ -651,7 +652,7 @@ class _TaskEditorState extends State<TaskEditor> {
       itemConfig: const ChipsChoiceItemConfig(
           selectedColor: Color(0xFFfabb18),
           selectedBrightness: Brightness.dark,
-          labelStyle: TextStyle(fontSize: 13)),
+          labelStyle: TextStyle(fontSize: 15)),
     );
   }
 
