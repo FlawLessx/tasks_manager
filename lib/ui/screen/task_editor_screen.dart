@@ -25,7 +25,6 @@ import '../widget/reorderable_item.dart';
 import '../widget/textfield_dialog.dart';
 import '../widget/time_picker.dart';
 import 'detail_screen.dart';
-import 'menu_dashboard_screen.dart';
 
 class TaskEditorArguments {
   final bool isNew;
