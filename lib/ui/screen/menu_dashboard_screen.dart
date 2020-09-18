@@ -53,8 +53,8 @@ class _MenuDashboardState extends State<MenuDashboard>
   @override
   void dispose() {
     drawerController.dispose();
-    didReceiveLocalNotificationSubject.close();
-    selectNotification.close();
+    //didReceiveLocalNotificationSubject.close();
+    //selectNotification.close();
     super.dispose();
   }
 

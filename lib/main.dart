@@ -17,9 +17,9 @@ import 'core/resources/hive_repository.dart';
 //
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
-final BehaviorSubject<ReceivedNotification> didReceiveLocalNotificationSubject =
-    BehaviorSubject<ReceivedNotification>();
-final BehaviorSubject<String> selectNotification = BehaviorSubject<String>();
+final PublishSubject<ReceivedNotification> didReceiveLocalNotificationSubject =
+    PublishSubject<ReceivedNotification>();
+final PublishSubject<String> selectNotification = PublishSubject<String>();
 
 NotificationAppLaunchDetails notificationAppLaunchDetails;
 
